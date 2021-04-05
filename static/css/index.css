@@ -1,0 +1,28 @@
+
+
+/*.nav-content:hover .nav-meun:after{*/
+
+/*display:block;*/
+
+/* transform:translateY(-100%);*/
+
+/* transition:all .5s;*/
+
+/*}*/
+
+/*.nav-content:hover .h1:after{*/
+
+/* background-color: #FFF;*/
+
+/* box-shadow:
+-4px 4px 3px #ed0813;height:100%;*/
+
+/* color: red;*/
+
+/* opacity:.8;*/
+
+/* -webkit-transform: translate(0, 100%);盒子移动*/
+
+/* transform: translate(0, 100%);*/
+
+/*}*/

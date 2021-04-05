@@ -1,0 +1,4 @@
+
+.idea/*
+config/conf.ini
+*__pycache__/*

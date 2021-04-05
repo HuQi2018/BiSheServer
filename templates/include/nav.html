@@ -1,0 +1,130 @@
+{% load set_var  %}
+<div id="nav">
+    <div id="nav-left" style="width:15%;float:left;height:50px;">
+        <a href="index.html" target="_black">
+            <div id="nav-left-ico" style="position:relative;">
+                <div id="nav-ico">
+
+                </div>
+            </div>
+        </a>
+    </div>
+    <div id="nav-right" style="width:83%;float:right;">
+        <div class="nav-content">
+            <div class="h1"><h1><a href="index.html">Zero影院</a></h1></div>
+        </div>
+
+{% for tag in nav_tag %}
+        <div class="nav-content">
+            <div class="h1 clear"><h1><a href="/search.html?tag={{ tag.name }}">{{ tag.name }}</a></h1></div>
+            <div class="nav-meun">
+                <div style="margin:0 10% 0 10%;height: 100%;">
+
+                    <div class="left" style="float:left;width: 45%;text-align: left;margin-left:5%;position: relative;">
+                        <a href="http://www.languang.co/movie/26309.html" target="_blank" style="height: 100%;display: inline-block;width: 170px;">
+                            <img class="thumb lazy" src="https://wx2.sinaimg.cn/mw1024/a2946c2dly1g9v8w8z2n2j20u018gx6s.jpg" alt="鬼影特攻：以暴制暴" data-original="https://wx2.sinaimg.cn/mw1024/a2946c2dly1g9v8w8z2n2j20u018gx6s.jpg" style="display: inline;height: 100%;max-width: 100%;transform: scale(1);object-fit: cover;">
+                        </a>
+                        <div style="display: inline-block;top: 0;position: absolute;"><h1>{{ tag.name }}{{ tag.left }}</h1></div>
+                    </div>
+                    <div class="right" style="float:right;width: 45%;text-align: left;margin-left:5%;position: relative;">
+                        <a href="http://www.languang.co/movie/26309.html" target="_blank" style="height: 100%;display: inline-block;width: 170px;">
+                            <img class="thumb lazy" src="https://wx2.sinaimg.cn/mw1024/a2946c2dly1g9v8w8z2n2j20u018gx6s.jpg" alt="鬼影特攻：以暴制暴" data-original="https://wx2.sinaimg.cn/mw1024/a2946c2dly1g9v8w8z2n2j20u018gx6s.jpg" style="display: inline;height: 100%;max-width: 100%;transform: scale(1);object-fit: cover;">
+                        </a>
+                        <div style="display: inline-block;top: 0;position: absolute;"><h1>{{ tag.name }}{{ tag.right }}</h1></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endfor %}
+
+        <div class="nav-content">
+            <div class="souuo"><div id="sosuobox"><form action="/search.html" class="w-search-form show_hidden" style="margin-top: 4px;"><input type="text" value="" id="s" name="s" placeholder="电影名称/明星/导演/年份" class="soiput"> <button type="submit" class="souicon"><i class="fa-search fa"></i></button></form></div></div>
+        </div>
+        <div class="nav-content">
+            <div class="history" > <i class="clock outline icon"></i>
+                <div class="menu" tabindex="-1"></div>
+            </div>
+            <div class="nav-meun">
+                <div style="margin:0 10% 0 10%;">
+                    <div class="left" style="float:left;width: 50%;text-align: left;height:136px;margin-left:5%;">
+                        <h1>历史记录表单</h1>
+                    </div>
+                    <div class="right" style="float:right;width: 45%;text-align: right;">
+                        <h1>也可添加猜你喜欢推荐表单</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+{% if userData %}
+        <div class="nav-content" style="margin-left:10px;">
+            <div class="btn-group">
+                <ul class="dropdown-menu top-dropdown-ul" role="menu">
+                    <li><a href="logout.html">注销</a>
+                    </li>
+                </ul>
+                <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown">
+                    <span id="top-dropdown-btn" style="position: relative;">
+                        <span class="fa "><img class="img-responsive" src="/static/images/avatar/{{ userData.userAvatar }}" style="width: 20px;height: 20px;top: 5px;position: relative;border-radius: 10px;word-wrap: inherit;word-break: inherit;word-spacing: inherit;">
+                        </span>&nbsp;{{ userData.userName }}
+                        <span class="caret"></span>
+                    </span>
+                </button>
+            </div>
+        </div>
+{% else %}
+        <div class="nav-content">
+            <div class="login h1">
+                <h1><a>登录</a></h1>
+            </div>
+            <div class="nav-meun">
+                <div style="margin:0 10% 0 10%;">
+
+                    <div>
+                        <h1 style="text-align: center;font-size: 24px;">用户登录</h1>
+                        <form class="login-form" action="/api/login" method="post" style="width: 300px;text-align: center;margin: 0 auto;color: black;">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon" style="background: #fff;">
+                                        <img src="/static/images/log_ic01.png" width="16" height="16" alt="用户名">
+                                    </div>
+                                    <input type="text" class="form-control" name="username" id="loginName" value="" placeholder="用户名" onblur="" autocomplete="off" style="color: black">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon" style="background: #fff;">
+                                        <img src="/static/images/log_ic02.png" width="16" height="16" alt="密码">
+                                    </div>
+                                    <input type="password" class="form-control" name="password" id="loginPwd" value="" placeholder="密码" onblur="" autocomplete="off" style="color: black">
+                                </div>
+                            </div>
+                            <div class="form-group" id="myDiv">
+                                <a href="/jwglxt/pwdmgr/retake/index.zf" id="wjmm" class="checkbox pull-right " target="_blank" style="margin-top: 0;">忘记密码？</a>
+                            </div>
+                            <div class="form-group">
+                                <button type="button" class="btn btn-primary btn-block" id="dl">登 录</button>
+                            </div>
+                        </form>
+                        <div class="reg-box" style="display: none;">
+                            <div class="item col-xs-12"> <span class="intelligent-label f-fl">邮箱：</span>
+                                <div class="f-fl item-ifo">
+                                    <input type="email" class="txt03 f-r3 required" tabindex="2" id="email" required="required">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="nav-content" style="margin-left:10px;">
+            <div class="register h1">
+                <h1><a href="/register.html">注册</a></h1>
+            </div>
+        </div>
+{% endif %}
+
+    </div>
+</div>

@@ -1,0 +1,27 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+ 
+<body>
+<div data-toggle="distpicker">
+    <select id="eprovinceName" data-province="浙江省" name="provinceName"></select>
+    <select id="ecityName" data-city="杭州市" name="cityName"></select>
+    <select id="edistrictName" data-district="西湖区" name="districtName"></select>
+</div>	
+	<input type='button'  value="提交"  id='tijiao'>{{ page }
+{% include "include/head.html" %}
+</body>	
+
+<script src="static/js/jquery.min.js"></script>
+<script src="static/js/distpicker.data.js"></script>
+<script src="static/js/distpicker.js"></script>
+<script>
+	$("#tijiao").click(function(){
+		var province = $("#eprovinceName").find("option:selected").text();
+		var city = $("#ecityName").find("option:selected").text();
+		var district = $("#edistrictName").find("option:selected").text();
+		console.log(province);
+		console.log(city);
+		console.log(district);
+	});
+</script>

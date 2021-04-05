@@ -19,9 +19,12 @@ from django.urls import path, include
 from django.conf import settings
 from django.views import static
 
+import api
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', include('BiShe.urls')),
+    url('api/', include('api.urls')),
     url('^static/(?P<path>.*)$', static.serve,
         {'document_root': settings.STATIC_ROOT}, name='static'),# 静态资源加载
 ]
@@ -38,5 +41,5 @@ if settings.DEBUG:
                   ] + urlpatterns
 
 # 全局404,500配置
-handler404 = "util.views.page_not_found"
-handler500 = "util.views.page_error"
+handler404 = "api.views.page_not_found"
+handler500 = "api.views.page_error"

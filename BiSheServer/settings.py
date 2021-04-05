@@ -26,7 +26,7 @@ default = CONFIG.defaults()
 # CONFIG.get('cmd', 'startserver')
 
 # 其余配置变量
-FONT_PATH = 'file/simkai.ttf'   #设置字体样式，支持TTF等文件格式
+FONT_PATH = 'file/汉仪中楷简.ttf'   #设置字体样式，支持TTF等文件格式
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     'BiShe.apps.BisheConfig',
     'movie',
     'user',
-    'util',
+    'api',
     'TestServer',
     # 开发时使用
     'django_extensions',
@@ -103,6 +103,9 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'libraries': {
+                    'set_var': 'api.set_var',
+            }
         },
     },
 ]

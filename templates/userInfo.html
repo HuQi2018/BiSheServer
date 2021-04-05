@@ -1,0 +1,34 @@
+<html lang="zh-cn">
+    
+    <head>
+        <title>Zero影院</title>
+        {% include "include/head.html" %}
+    </head>
+    
+    <body class="home">
+        {% include "include/nav.html" %}
+        <div id="main">
+            {% include "include/tag.html" %}
+            <div id="mikd">
+                <div class="mi_btcon" style="padding: 20px;">
+                    <center><h2>用户信息：个人信息、收藏、评论、信息修改</h2></center>
+                </div>
+            </div>
+            <div id="mikd">
+                <ul class="navLi nav-tabs">
+					<li class="active"><a href="#info">个人资料</a></li>
+					<li><a href="#">收藏管理</a></li>
+					<li><a href="#">评论管理</a></li>
+				</ul>
+                <div class="mi_btcon">
+                    <div class="col-xs-12"> <span class="intelligent-label f-fl">用户名：</span> 
+                        <label class="col-md-4 col-xs-12 control-label"><span>3-20位，中文、字母、数字、下划线的组合，以中文或字母开头</span></label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% include "include/footer.html" %}
+    </body>
+
+</html>
