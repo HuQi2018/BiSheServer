@@ -6,13 +6,29 @@
 <meta name="description" content="Zero影院">
 <meta name="referrer" content="never">
 
-<link rel="icon" type="image/x-icon" href="static/images/icon.ico">
-<link href="static/css/smohan.face.css" type="text/css" rel="stylesheet">
-<link href="static/css/semantic.min.css" type="text/css" rel="stylesheet">
-<link rel="stylesheet" href="static/css/style.css" media="all" type="text/css" />
-<link rel="stylesheet" href="static/css/default.css" media="all" type="text/css" />
-<link href="static/css/bootstrap.css" rel="stylesheet">
-<script src="static/js/jquery.min.js"></script>
-<script src="static/js/jquery.base64.min.js"></script>
-<script src="static/js/jquery.cookie.js"></script>
-<script src="static/js/js.js" type="text/javascript" charset="utf-8"></script>
+<link href="/static/css/bootstrap.css" rel="stylesheet">
+<link rel="shortcut icon" type="image/x-icon" href="/static/images/icon.ico">
+<link href="/static/css/smohan.face.css" type="text/css" rel="stylesheet">
+<link href="/static/css/semantic.min.css" type="text/css" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css" media="all" type="text/css" />
+<link rel="stylesheet" href="/static/css/default.css" media="all" type="text/css" />
+<script src="/static/js/jquery.min.js"></script>
+<script src="/static/js/jquery.base64.min.js"></script>
+<script src="/static/js/jquery.cookie.js"></script>
+<script src="/static/js/js.js" type="text/javascript" charset="utf-8"></script>
+
+{#全屏提示#}
+{#<div style="width: 100%;height: 100%;position: fixed;background-color: #b9b9bf;z-index: 9999;opacity: 0.8;transform: translateY(-60px);/* display: none; */overflow: hidden;"></div>#}
+{#<div class="" style="z-index: 99999;display: block;top: 50%;left: 50%;width: 500px;height: 100px;box-sizing: content-box;max-width: 75%;transform: translateX(-50%) translateY(-50%);max-height: 75%;position: fixed;">#}
+{##}
+{#<a href="javascript:;" class="fa fa-close editormd-dialog-close" style="position: absolute;top: 10px;right: 10px;"></a>#}
+{#</div>#}
+
+{#小窗口提示#}
+<div class="" id="info-tip" style="">
+    <div style="width: 100%;height: 100%;position: relative;padding: 15px;margin: 0 auto;">
+        <h3 style="text-align: center;font-weight: bold;">提示窗口</h3>
+        <p style="text-indent: 2em;font-weight: bolder;" id="info-tip-contents">提示信息。</p>
+    </div>
+    <a href="javascript:void(0)" onclick="close_tip();" class="fa fa-close" style="position: absolute;top: 15px;right: 20px;"></a>
+</div>

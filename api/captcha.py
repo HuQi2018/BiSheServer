@@ -1,18 +1,21 @@
-import random
 from io import BytesIO
 
 from PIL import Image, ImageFont
 from PIL.ImageDraw import ImageDraw
 from django.conf import settings
 from django.http import HttpResponse
-
+import time
 import random
+
+
+# 验证码图片生成工具
 def generate_code():
     source = "0123456789qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM"
     code = ""
     for i in range(4):
         code += random.choice(source)
     return code
+
 
 def get_code(request):
 
@@ -27,6 +30,9 @@ def get_code(request):
     image = Image.new(mode=mode, size=size, color=color_bg) # 画布
     imagedraw = ImageDraw(image,mode=mode)  # 画笔
     verify_code = generate_code()    # 内容
+    request.session['reg_verify_code'] = [verify_code,time.time()]  # code加入到session中
+    # cache.set('reg_verify_code',verify_code)
+    # cache.expire('reg_verify_code', 3 * 60)
     imagefont = ImageFont.truetype(settings.FONT_PATH,100)  # 字体 样式 大小
 
     # 字体 颜色

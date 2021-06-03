@@ -1,0 +1,116 @@
+
+<link href="/static/css/gloab.css" rel="stylesheet">
+<link href="/static/css/register.css" rel="stylesheet">
+<script src="/static/js/register.js"></script>
+<div class="mikd">
+    <div class="reg-box-pan display-inline">
+        <div class="step">
+            <ul>
+                <li class="col-xs-4 on"> <span class="num"><em class="f-r5"></em><i>1</i></span>
+                    <span class="line_bg lbg-r"></span>
+                    <p class="lbg-txt">账号核实</p>
+                </li>
+                <li class="col-xs-4"> <span class="num"><em class="f-r5"></em><i>2</i></span>
+                    <span class="line_bg lbg-l"></span>
+                    <span class="line_bg lbg-r"></span>
+                    <p class="lbg-txt">验证信息</p>
+                </li>
+                <li class="col-xs-4"> <span class="num"><em class="f-r5"></em><i>3</i></span>
+                    <span class="line_bg lbg-l"></span>
+                    <p class="lbg-txt">重置密码</p>
+                </li>
+            </ul>
+        </div>
+        <div class="reg-box" id="verifyCheck" style="margin-top:20px;">
+            <form class="part1" id="part1" onsubmit="return fget1();">
+                {% csrf_token %}
+                <div class="item col-xs-12"> <span class="intelligent-label f-fl"><b class="ftx04">*</b>用户名：</span>
+                    <div class="f-fl item-ifo">
+                        <input type="text" name="user_name" maxlength="20" class="txt03 f-r3 required" tabindex="1" data-valid="isNonEmpty||between:3-20||isUname" data-error="用户名不能为空||用户名长度3-20位||只能输入中文、字母、数字、下划线，且以中文或字母开头" id="adminNo"> <span class="ie8 icon-close close hide"></span>
+                        <label class="icon-sucessfill blank hide"></label>
+                        <label class="focus"><span>3-20位，中文、字母、数字、下划线的组合，以中文或字母开头</span>
+                        </label>
+                        <label class="focus valid"></label>
+                    </div>
+                </div>
+                <div class="item col-xs-12"> <span class="intelligent-label f-fl"><b class="ftx04">*</b>验证码：</span>
+                    <div class="f-fl item-ifo">
+                        <input type="text" maxlength="4" name="randCode" class="txt03 f-r3 f-fl required" tabindex="4" style="width:167px" id="randCode" data-valid="isNonEmpty||isNonRandCode" data-error="验证码不能为空||验证码不符合要求"> <span class="ie8 icon-close close hide"></span>
+                        <label class="f-size12 c-999 f-fl f-pl10" onclick="re_captcha();">
+                            <img src="/api/captcha" style="width: 90px;height: 35px;" id="imgCode">
+                        </label>
+                        <label class="icon-sucessfill blank hide" style="left:380px"></label>
+                        <label class="focusa">看不清？<a href="javascript:;" onclick="re_captcha();" class="c-blue">换一张</a>
+                        </label>
+                        <label class="focus valid" style="left:370px"></label>
+                    </div>
+                </div>
+                <p style="margin-top: 10px;text-align: center;height: 20px;color: red;" id="error_msg1"></p>
+                <div class="item col-xs-12"> <span class="intelligent-label f-fl">&nbsp;</span>
+                    <div class="f-fl item-ifo">
+                        <input type="submit" class="btn btn-blue f-r3" id="fget_btn_part1" value="下一步">
+                    </div>
+                </div>
+            </form>
+            <form class="part2" id="part2" onsubmit="return fget2();"  style="display:none">
+                {% csrf_token %}
+                <div class="item col-xs-12 f-mb10"> <span class="intelligent-label f-fl"><b class="ftx04">*</b>邮箱：</span>
+                    <div class="f-fl item-ifo">
+                        <input type="email" class="txt03 f-r3 required" name="user_mail" value="{{ request.session.user_mail }}" keycodes="email" data-valid="isNonEmpty||isEmail" data-error="邮箱地址不能为空||邮箱地址格式不正确" tabindex="2" id="reg_email" required="required"/> <span class="ie8 icon-close close hide"></span>
+                        <label class="icon-sucessfill blank hide"></label>
+                        <label class="focus" style="color: red">请补充完整对应的邮箱地址</label>
+                        <label class="focus valid"></label>
+                    </div>
+                </div>
+                <div class="item col-xs-12"> <span class="intelligent-label f-fl"><b class="ftx04">*</b>验证码：</span>
+                    <div class="f-fl item-ifo">
+                        <input type="text" maxlength="6" id="verifyNo" name="emailCode" class="txt03 f-r3 f-fl required" tabindex="4" style="width:167px" data-valid="isNonEmpty||isInt" data-error="验证码不能为空||请输入6位数字验证码">	<span class="btn btn-gray f-r3 f-ml5 f-size13" id="time_box" disabled="" style="width:97px;display:none;">发送验证码</span>
+                        <span class="btn btn-gray f-r3 f-ml5 f-size13" id="verifyYz" style="width:97px;" data-set="2">发送验证码</span>
+                        <span class="ie8 icon-close close hide" style="right:130px"></span>
+                        <label class="icon-sucessfill blank hide"></label>
+                        <label class="focus"><span>请查收邮箱中的邮件，并填写邮件中的验证码（此验证码3分钟内有效）</span>
+                        </label>
+                        <label class="focus valid"></label>
+                    </div>
+                </div>
+                <p style="margin-top: 10px;text-align: center;height: 20px;color: red;" id="error_msg2"></p>
+                <div class="item col-xs-12"> <span class="intelligent-label f-fl">&nbsp;</span>
+                    <div class="f-fl item-ifo">
+                        <input type="submit" class="btn btn-blue f-r3" id="fget_btn_part2" value="下一步">
+                    </div>
+                </div>
+            </form>
+            <form class="part2" id="part3" onsubmit="return fget3();" style="display:none">
+                {% csrf_token %}
+                <div class="item col-xs-12"> <span class="intelligent-label f-fl"><b class="ftx04">*</b>密码：</span>
+                    <div class="f-fl item-ifo">
+                        <input type="password" id="password" name="user_passwd" maxlength="20" class="txt03 f-r3 required" tabindex="3" style="ime-mode:disabled;" onpaste="return  false" autocomplete="off" data-valid="isNonEmpty||between:6-20||level:2" data-error="密码不能为空||密码长度6-20位||该密码太简单，有被盗风险，建议字母+数字的组合"> <span class="ie8 icon-close close hide" style="right:55px"></span>
+                        <span class="showpwd" data-eye="password"></span>
+                        <label class="icon-sucessfill blank"></label>
+                        <label class="focus hide">6-20位英文（区分大小写）、数字、字符的组合</label>
+                        <label class="focus valid error"></label> <span class="clearfix"></span>
+                        <label class="strength" style="display: inline-block;">
+                            <span class="f-fl f-size12">安全程度：</span>
+                            <b><i class="on">弱</i><i class="on">中</i><i class="on">强</i></b>
+                        </label>
+                    </div>
+                </div>
+                <div class="item col-xs-12"> <span class="intelligent-label f-fl"><b class="ftx04">*</b>确认密码：</span>
+                    <div class="f-fl item-ifo">
+                        <input type="password" maxlength="20" class="txt03 f-r3 required" tabindex="4" style="ime-mode:disabled;" onpaste="return  false" autocomplete="off" data-valid="isNonEmpty||between:6-16||isRepeat:password" data-error="密码不能为空||密码长度6-16位||两次密码输入不一致" id="rePassword"> <span class="ie8 icon-close close hide" style="right:55px"></span>
+                        <span class="showpwd" data-eye="rePassword"></span>
+                        <label class="icon-sucessfill blank hide"></label>
+                        <label class="focus">请再输入一遍上面的密码</label>
+                        <label class="focus valid"></label>
+                    </div>
+                </div>
+                <p style="margin-top: 10px;text-align: center;height: 20px;color: red;" id="error_msg3"></p>
+                <div class="item col-xs-12"> <span class="intelligent-label f-fl">&nbsp;</span>
+                    <div class="f-fl item-ifo">
+                        <input type="submit" class="btn btn-blue f-r3" id="fget_btn_part3" value="修改">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,29 @@
+
+<script type="text/javascript">
+    let user_movie_like = {{ data.user_movie_like|safe|default:"[]" }};
+</script>
+<div id="user_info_modify" class="mikd">
+    <ul class="navLi nav-tabs">
+        <li><a href="/userInfo.html">个人信息</a></li>
+        <li><a href="/modifyPwd.html">密码修改</a></li>
+        <li><a href="/modifyEmail.html">邮箱修改</a></li>
+        <li class="active"><a href="/userCollection.html">收藏管理</a></li>
+        <li><a href="/userComment.html">评论管理</a></li>
+    </ul>
+    <div class="reg-box-pan display-inline">
+        <div class="reg-box" style="margin-top:20px;">
+            <div class="mi_btcon">
+                    <div class="bt_tit mi_ne_kd">
+                        	<h2><a href="javascript:void(0);">收藏</a><i class="fa"></i></h2>
+                    </div>
+                    <div class="bt_img mi_ne_kd leibox" id="user_movie_like">
+
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    movie_show(user_movie_like,"user_movie_like");
+</script>

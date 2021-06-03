@@ -1,0 +1,249 @@
+{% load set_var  %}
+{% set userBaseData = data.userBaseData %}
+{% set usersDetailData = data.usersDetailData %}
+<link href="/static/css/gloab.css" rel="stylesheet">
+<link href="/static/css/register.css" rel="stylesheet">
+<script src="/static/js/register.js"></script>
+<form id="user_info_modify" class="mikd" onsubmit="return false" enctype="multipart/form-data" >
+    {% csrf_token %}
+    <ul class="navLi nav-tabs">
+        <li class="active"><a href="/userInfo.html">个人信息</a></li>
+        <li><a href="/modifyPwd.html">密码修改</a></li>
+        <li><a href="/modifyEmail.html">邮箱修改</a></li>
+        <li><a href="/userCollection.html">收藏管理</a></li>
+        <li><a href="/userComment.html">评论管理</a></li>
+    </ul>
+    <div class="link_btn_bar push-down-0 btn-group-sm push-up-10 pull-right">
+        <button type="text" class="link_btn add-btn" id="edit_info">
+            <i class="fa fa-edit"></i>编辑
+        </button>
+        <button type="submit" class="link_btn add-btn" id="saveSetting">
+            <i class="fa fa-save"></i>保存
+        </button>
+        <button type="text" class="link_btn add-btn" id="saveSetting_cancel">
+            <i class="fa fa-reply"></i>返回
+        </button>
+        <p style="margin-top: 10px;text-align: center;height: 20px;color: red;" id="error_msg"></p>
+    </div>
+    <div class="mi_btcon user_info reg-box" id="user_info">
+        <div class="form-horizontal push-up-20 push-down-20" style="width:50%;">
+            <div class="item col-xs-12">
+                <span class="intelligent-label f-fl">头像：</span>
+                <div class="f-fl item-ifo info">
+                    <img class="preview" src="{{ userBaseData.user_img|default:"static/images/user.jpg" }}" alt="" />
+                </div>
+                <div class="f-fl item-ifo input">
+                    <div style="">
+                        <img id="preview" src="{{ userBaseData.user_img|default:"static/images/user.jpg" }}" alt="" />
+                    </div>
+                    <input type="file" id="fileid" class="txt03 f-r3"  name="user_img" onchange="preImg(this.id,'imgid');" accept="image/*" />
+                </div>
+            </div>
+            <div class="item col-xs-12">
+                <span class="intelligent-label f-fl">用户名：</span>
+                <div class="f-fl item-ifo">{{ userBaseData.user_name }}</div>
+            </div>
+            <div class="item col-xs-12">
+                <span class="intelligent-label f-fl">手机号：</span>
+                <div class="f-fl item-ifo info">{{ userBaseData.user_phone }}</div>
+                <div class="f-fl item-ifo input">
+                    <input type="text" class="txt03 f-r3 required" name="user_phone" value="{{ userBaseData.user_phone }}" keycodes="tel" tabindex="2" data-valid="isNonEmpty||isPhone" data-error="手机号码不能为空||手机号码格式不正确" maxlength="11" id="phone">
+                </div>
+            </div>
+            <div class="item col-xs-12">
+                <span class="intelligent-label f-fl">性别：</span>
+                <div class="f-fl item-ifo info">
+                {% if userBaseData.user_gender == '1' %}
+                    男
+                    {% elif userBaseData.user_gender == '2' %}
+                    女
+                    {% else %}
+                    未知
+                {% endif %}
+                </div>
+                <div class="f-fl item-ifo input">
+                {% if userBaseData.user_gender == '1' %}
+                    <input type="radio" id="test_radio1" name="sex" value="1" checked="checked" />男 &nbsp;&nbsp;
+                    <input type="radio" id="test_radio2" name="sex" value="2" />女
+                    {% elif userBaseData.user_gender == '2' %}
+                    <input type="radio" id="test_radio1" name="sex" value="1" />男 &nbsp;&nbsp;
+                    <input type="radio" id="test_radio2" name="sex" value="2" checked="checked" />女
+                    {% else %}
+                    <input type="radio" id="test_radio1" name="sex" value="1" />男 &nbsp;&nbsp;
+                    <input type="radio" id="test_radio2" name="sex" value="2" />女
+                {% endif %}
+                </div>
+            </div>
+            <div class="item col-xs-12">
+                <span class="intelligent-label f-fl">昵称：</span>
+                <div class="f-fl item-ifo info">{{ userBaseData.user_uname }}</div>
+                <div class="f-fl item-ifo input">
+                    <input type="text" maxlength="20" name="user_uname" class="txt03 f-r3" tabindex="1" value="{{ userBaseData.user_uname }}" id="uName">
+                </div>
+            </div>
+        </div>
+        <div class="form-horizontal push-up-20 push-down-20" style="width:50%;">
+            <div class="item col-xs-12"> <span class="intelligent-label f-fl">出生日期：</span>
+                <div class="f-fl item-ifo info">&nbsp;{{ usersDetailData.user_birthday|date:"Y-m-d" }}</div>
+                <div class="f-fl item-ifo input">
+                    <input type="date" name="user_birthday" class="txt03 f-r3" tabindex="1"  value="{{ usersDetailData.user_birthday|date:"Y-m-d" }}">
+                </div>
+            </div>
+            <div class="item col-xs-12">
+                <span class="intelligent-label f-fl">年龄：</span>
+                <div class="f-fl item-ifo info">&nbsp;{{ usersDetailData.user_age }}</div>
+                <div class="f-fl item-ifo input">
+                    <input type="number" maxlength="3" name="user_age" class="txt03 f-r3" tabindex="1" id="uAge" value="{{ usersDetailData.user_age }}">
+                </div>
+            </div>
+            <div class="item col-xs-12"> <span class="intelligent-label f-fl">省/直辖市：</span>
+                <div class="f-fl item-ifo info">&nbsp;{{ usersDetailData.user_province }}</div>
+                <div class="f-fl item-ifo input">
+                    <select class="form-control" name="provinceName" onchange="appendList(this.options[this.options.selectedIndex].getAttribute('code'),'city')" data-province="---- 选择省 ----" id="province">
+                        {% if usersDetailData.user_province %}
+                            <option value='{{ usersDetailData.user_province }}'>{{ usersDetailData.user_province }}</option>
+                        {% else %}
+                            <option value='0'>---- 请选择 ----</option>
+                        {% endif %}
+                    </select>
+                </div>
+            </div>
+            <div class="item col-xs-12"> <span class="intelligent-label f-fl">城市：</span>
+                <div class="f-fl item-ifo info">&nbsp;{{ usersDetailData.user_city }}</div>
+                <div class="f-fl item-ifo input">
+                    <select class="form-control" name="cityName" onchange="appendList(this.options[this.options.selectedIndex].getAttribute('code'),'area')" data-city="---- 选择市 ----" id="city">
+                        {% if usersDetailData.user_city %}
+                            <option value='{{ usersDetailData.user_city }}'>{{ usersDetailData.user_city }}</option>
+                        {% else %}
+                            <option value=''>---- 请选择 ----</option>
+                        {% endif %}
+                    </select>
+                </div>
+            </div>
+            <div class="item col-xs-12"> <span class="intelligent-label f-fl">区县：</span>
+                <div class="f-fl item-ifo info">&nbsp;{{ usersDetailData.user_district }}</div>
+                <div class="f-fl item-ifo input">
+                    <select class="form-control" name="districtName" data-district="---- 选择区 ----" id="area">
+                        {% if usersDetailData.user_district %}
+                            <option value='{{ usersDetailData.user_district }}'>{{ usersDetailData.user_district }}</option>
+                        {% else %}
+                            <option value=''>---- 请选择 ----</option>
+                        {% endif %}
+                    </select>
+                </div>
+            </div>
+            <div class="item col-xs-12"> <span class="intelligent-label f-fl">详细地址：</span>
+                <div class="f-fl item-ifo info">&nbsp;{{ usersDetailData.user_address }}</div>
+                <div class="f-fl item-ifo input">
+                    <input type="text" name="user_address" value="{{ usersDetailData.user_address }}" maxlength="50" class="txt03 f-r3" tabindex="1" id="uAddress">
+                </div>
+            </div>
+            <div class="item col-xs-12 input"> <span class="intelligent-label f-fl">验证码：</span>
+                <div class="f-fl item-ifo">
+                    <input type="text" maxlength="4" name="randCode" class="txt03 f-r3 f-fl required" tabindex="4" style="width:167px" id="randCode" data-valid="isNonEmpty||isNonRandCode" data-error="验证码不能为空||验证码不符合要求"> <span class="ie8 icon-close close hide"></span>
+                    <label class="f-size12 c-999 f-fl f-pl10" onclick="re_captcha();">
+                        <img src="data:image/png;base64,yujiazai" style="width: 90px;height: 35px;" id="imgCode" alt="点击加载验证码">
+                    </label>
+                    <label class="focusa" style="left: 270px;width: 100px;">看不清？<a href="javascript:;" onclick="re_captcha();" class="c-blue">换一张</a>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <section class="aui-flexView forbidden" id="user_type">
+        <header class="aui-navBar aui-navBar-fixed">
+            <div class="aui-center">
+                <span class="aui-center-title">请选择您喜爱的电影类型</span>
+            </div>
+        </header>
+        <input type="hidden" name="user_prefer" id="user_prefer" value="{{ usersDetailData.user_prefer }}" />
+        <section class="aui-scrollView">
+            <div class="aui-ui-choose">
+                <ul class="ui-choose choose-type-right" multiple="multiple" id="uc_01">
+                    {% for tag in data.movie_tag %}
+                        <li {% if tag.movie_type in usersDetailData.user_prefer %}class="selected"{% endif %}>{{ tag.movie_type }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </section>
+        <header class="aui-navBar aui-navBar-fixed">
+            <div class="aui-center">
+                <span class="aui-center-title">选择你的兴趣爱好</span>
+            </div>
+        </header>
+        <input type="hidden" name="user_hobbies" id="user_hobbies" value="{{ usersDetailData.user_hobbies }}" />
+        <section class="aui-scrollView">
+            <div class="aui-ui-choose">
+                <ul class="ui-choose choose-type-right" multiple="multiple" id="uc_02">
+                    {% for tag in data.user_hobbies %}
+                        <li {% if tag.user_prefer in usersDetailData.user_hobbies %}class="selected"{% endif %}>{{ tag.user_prefer }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </section>
+    </section>
+</form>
+<script type="text/javascript" charset="utf-8">
+    $("#edit_info").click(function(){
+        re_captcha();
+        $("#edit_info").hide();
+        $("#saveSetting").show();
+        $("#saveSetting_cancel").show();
+        $(".user_info .input").show();
+        $(".user_info .info").hide();
+        $("#user_type").toggleClass("forbidden");
+    })
+    $("#saveSetting").click(function(){
+        user_info_modify();
+    //     $("#edit_info").show();
+    //     $("#saveSetting").hide();
+    //     $("#saveSetting_cancel").hide();
+    //     $(".user_info .input").hide();
+    //     $(".user_info .info").show();
+    //     $("#user_type").toggleClass("forbidden");
+    })
+    $("#saveSetting_cancel").click(function(){
+        $("#edit_info").show();
+        $("#saveSetting").hide();
+        $("#saveSetting_cancel").hide();
+        $(".user_info .input").hide();
+        $(".user_info .info").show();
+        $("#user_type").toggleClass("forbidden");
+    })
+    $(function(){
+        {#var defaultOption="<option value='0'>---- 请选择 ----</option>";#}
+        // 为3个<select>添加默认选项
+        {#$("#province").append(defaultOption);#}
+        {#$("#city").append(defaultOption);#}
+        {#$("#area").append(defaultOption);#}
+
+        // 自动生成省级列表
+        appendList(86,"province");
+    });
+
+    $('.ui-choose').ui_choose();
+    var uc_01 = $('#uc_01').data('ui-choose');
+    // uc_01.click = function (index, item) {
+    // 	console.log('click', index);
+    // };
+    uc_01.change = function (index, item) {
+        var arr=[];
+        item.find(".selected").each(function(i,val){ arr[i]=val.innerHTML;});
+        console.log(arr);
+        $("#user_prefer").val(arr);
+        // $("#user_prefer").val(index);
+        // console.log('change', index);
+    };
+    var uc_02 = $('#uc_02').data('ui-choose');
+    // uc_02.click = function (index, item) {
+    // 	console.log('click', index);
+    // };
+    uc_02.change = function (index, item) {
+        var arr=[];
+        item.find(".selected").each(function(i,val){ arr[i]=val.innerHTML;});
+        console.log(arr);
+        $("#user_hobbies").val(arr);
+        // $("#user_hobbies").val(index);
+        // console.log('change', index);
+    };
+</script>

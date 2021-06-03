@@ -1,0 +1,56 @@
+
+<link href="/static/css/gloab.css" rel="stylesheet">
+<link href="/static/css/register.css" rel="stylesheet">
+<script src="/static/js/register.js"></script>
+<form id="user_info_modify" class="mikd" onsubmit="return user_email_modify();">
+    {% csrf_token %}
+    <ul class="navLi nav-tabs">
+        <li><a href="/userInfo.html">个人信息</a></li>
+        <li><a href="/modifyPwd.html">密码修改</a></li>
+        <li class="active"><a href="/modifyEmail.html">邮箱修改</a></li>
+        <li><a href="/userCollection.html">收藏管理</a></li>
+        <li><a href="/userComment.html">评论管理</a></li>
+    </ul>
+    <div class="reg-box-pan display-inline" id="user_email_modify">
+        <div class="reg-box" id="verifyCheck" style="margin-top:20px;">
+            <div class="item col-xs-12 f-mb10" style="height:auto"> <span class="intelligent-label f-fl">邮箱：</span>
+                <div class="f-fl item-ifo c-blue">{{ request.session.user_email }}</div>
+            </div>
+            <div class="item col-xs-12 f-mb10"> <span class="intelligent-label f-fl">新邮箱：</span>
+                <div class="f-fl item-ifo">
+                    <input type="email" class="txt03 f-r3 required" name="user_mail" value="" keycodes="email" data-valid="isNonEmpty||isEmail" data-error="邮箱地址不能为空||邮箱地址格式不正确" tabindex="2" id="reg_email" required="required"/> <span class="ie8 icon-close close hide"></span>
+                    <label class="icon-sucessfill blank hide"></label>
+                    <label class="focus">请输入新的邮箱地址</label>
+                    <label class="focus valid"></label>
+                </div>
+            </div>
+            <div class="item col-xs-12 input"> <span class="intelligent-label f-fl">验证码：</span>
+                <div class="f-fl item-ifo">
+                    <input type="text" maxlength="4" name="randCode" class="txt03 f-r3 f-fl required" tabindex="4" style="width:167px" id="randCode" data-valid="isNonEmpty||isNonRandCode" data-error="验证码不能为空||验证码不符合要求"> <span class="ie8 icon-close close hide"></span>
+                    <label class="f-size12 c-999 f-fl f-pl10" onclick="re_captcha();">
+                        <img src="/api/captcha" style="width: 90px;height: 35px;" id="imgCode">
+                    </label>
+                    <label class="focusa" style="left: 270px;width: 100px;">看不清？<a href="javascript:;" onclick="re_captcha();" class="c-blue">换一张</a>
+                    </label>
+                </div>
+            </div>
+            <div class="item col-xs-12"> <span class="intelligent-label f-fl">邮箱验证码：</span>
+                <div class="f-fl item-ifo">
+                    <input type="text" maxlength="6" id="verifyNo" name="emailCode" class="txt03 f-r3 f-fl required" tabindex="4" style="width:167px" data-valid="isNonEmpty||isInt" data-error="验证码不能为空||请输入6位数字验证码">	<span class="btn btn-gray f-r3 f-ml5 f-size13" id="time_box" disabled="" style="width:97px;display:none;">发送验证码</span>
+                    <span class="btn btn-gray f-r3 f-ml5 f-size13" id="verifyYz" style="width:97px;" data-set="3">发送验证码</span>
+                    <span class="ie8 icon-close close hide" style="right:130px"></span>
+                    <label class="icon-sucessfill blank hide"></label>
+                    <label class="focus"><span>请查收邮箱中的邮件，并填写邮件中的验证码（此验证码3分钟内有效）</span>
+                    </label>
+                    <label class="focus valid"></label>
+                </div>
+            </div>
+            <p style="margin-top: 10px;text-align: center;height: 20px;color: red;" id="error_msg2"></p>
+            <div class="item col-xs-12"> <span class="intelligent-label f-fl">&nbsp;</span>
+                <div class="f-fl item-ifo">
+                    <input type="submit" class="btn btn-blue f-r3" value="修改邮箱">
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

@@ -27,6 +27,327 @@
 *
 * 详细代码请看register.src.js
 */
+
+
+function reg1(){
+	var timeout;
+	$('#error_msg1').html("");
+	if(verifyCheck._click()){
+		$.ajax({
+			"url":"/user/register1",
+			"data":$("#part1").serialize(),
+			"type":"POST",
+			"dataType":"json",
+			"success":function(data){
+				email = data.data.email;
+				userName = data.data.userName;
+				if(data.code==200&&email){
+					$("#reg_email").val(email);  //填充邮箱
+					$("#userName").html(userName);  //填充用户名
+					$("#verifyYz").click();	//发送验证码
+					$(".part1").hide();	//切换显示登陆步骤
+					$(".part2").show();
+					$(".step li").eq(1).addClass("on");
+					// alert(data.data.msg);
+				}else{
+				   $('#error_msg1').html(data.msg);	//请求失败提示
+				   timeout = setTimeout(function(){$("#error_msg1").html("")},5000);
+				}
+				console.log(data);
+			},
+		});
+	}
+	return false;
+}
+
+
+function reg2(){
+	var timeout;
+	$('#error_msg2').html("");
+	if(verifyCheck._click()){
+		$.ajax({
+			"url":"/user/register2",
+			"data":$("#part2").serialize(),
+			"type":"POST",
+			"dataType":"json",
+			"success":function(data){
+				if(data.code==200){
+                    $(".part2").hide(); //切换显示登陆步骤
+                    $(".part3").show();
+                    $(".step li").eq(2).addClass("on");
+				   // alert(data.data.msg);
+				}else{
+				   $('#error_msg2').html(data.msg);	//请求失败提示
+				   timeout = setTimeout(function(){$("#error_msg2").html("")},5000);
+				}
+				console.log(data);
+			},
+		});
+	}
+	return false;
+}
+
+function reg3(){
+	var timeout;
+	var formData = new FormData($("#part3")[0]);
+	$('#error_msg3').html("");
+	if(verifyCheck._click()){
+		$.ajax({
+			"url":"/user/register3",
+			"data":formData,
+			"type":"POST",
+			"dataType":"json",
+			"async": false,
+			"cache": false,
+			"contentType": false,
+			"processData": false,
+			"success":function(data){
+				if(data.code==200){
+					$(".part3").hide();//切换显示登陆步骤
+					$(".part4").show();
+					$(".step li").eq(3).addClass("on");
+					countdown({
+						maxTime: 10,
+						ing: function (c) {
+							$("#times").text(c);
+						},
+						after: function () {
+							window.location.href = "index.html";
+						}
+					});
+				   // alert(data.data.msg);
+				}else{
+				   $('#error_msg3').html(data.msg);	//请求失败提示
+				   timeout = setTimeout(function(){$("#error_msg3").html("")},5000);
+				}
+				console.log(data);
+			},
+		});
+	}
+	return false;
+}
+
+function reg3_jump(){
+	if(confirm("确认跳过么？跳过将导致系统无法更好地收集您的信息，给您更精确的推送信息，当然您也可以选择登录后在用户中心更新该信息。")) {
+		var csrfmiddlewaretoken = $("[name=csrfmiddlewaretoken]")[0].value;
+		$.ajax({
+			"url": "/user/register3",
+			"data": {"csrfmiddlewaretoken": csrfmiddlewaretoken},
+			"type": "POST",
+			"dataType": "json",
+			"success": function (data) {
+				if (data.code == 200) {
+					$(".part3").hide();//切换显示登陆步骤
+					$(".part4").show();
+					$(".step li").eq(3).addClass("on");
+					countdown({
+						maxTime: 10,
+						ing: function (c) {
+							$("#times").text(c);
+						},
+						after: function () {
+							window.location.href = "index.html";
+						}
+					});
+					// alert(data.data.msg);
+				} else {
+					$('#error_msg3').html(data.msg);	//请求失败提示
+					timeout = setTimeout(function () {
+						$("#error_msg3").html("")
+					}, 5000);
+				}
+				console.log(data);
+			},
+		});
+	}
+}
+
+function showoutc() {
+	$(".m-sPopBg,.m-sPopCon").show();
+}
+function closeClause() {
+	$(".m-sPopBg,.m-sPopCon").hide();
+}
+
+// parent是父级编号，sid是select标签的id属性的值
+function appendList(parent,sid){
+	// 发送ajax请求
+	$.ajax({
+		"url":"api/districts",
+		"data":"parent="+parent,
+		"type":"get",
+		"dataType":"json",
+		"success":function(json) {
+			// 获取列表的数组
+			var list = json.data;
+			if(sid!="province") {
+				if (sid == "city") {
+					$("#area").html("<option value=''>---- 请选择 ----</option>");
+				}
+				$("#" + sid).html("<option value=''>---- 请选择 ----</option>");
+			}
+			// 遍历数组
+			for(var i=0;i<list.length;i++){
+				// console.log(list[i]);
+				// 每一条记录生成一个option
+				var option="<option value='"+
+					list[i].name+"' code='"+list[i].code+"'>"+list[i].name+"</option>";
+				// var option="<option value='"+list[i].code+"'>"+list[i].name+"</option>";
+				// 将option添加到select内部
+				$("#"+sid).append(option);
+			}
+		}
+	});
+}
+
+function fget1(){
+	var timeout;
+	$('#error_msg1').html("");
+	if(verifyCheck._click()){
+		$.ajax({
+			"url":"/user/fget?step=1",
+			"data":$("#part1").serialize(),
+			"type":"POST",
+			"dataType":"json",
+			"success":function(data){
+				email = data.data.email;
+				if(data.code==200&&email){
+					$("#reg_email").val(email);  //填充邮箱
+					// $("#verifyYz").click();	//发送验证码
+					$(".part1").hide();	//切换显示登陆步骤
+					$("#part2").show();
+					$(".step li").eq(1).addClass("on");
+					// alert(data.data.msg);
+				}else{
+				   $('#error_msg1').html(data.msg);	//请求失败提示
+				   timeout = setTimeout(function(){$("#error_msg1").html("")},5000);
+				}
+				console.log(data);
+			},
+		});
+	}
+	return false;
+}
+
+
+function fget2(){
+	var timeout;
+	$('#error_msg2').html("");
+	if(verifyCheck._click()){
+		$.ajax({
+			"url":"/user/fget?step=2",
+			"data":$("#part2").serialize(),
+			"type":"POST",
+			"dataType":"json",
+			"success":function(data){
+				if(data.code==200){
+                    $("#part2").hide(); //切换显示登陆步骤
+                    $("#part3").show();
+                    $(".step li").eq(2).addClass("on");
+				   // alert(data.data.msg);
+				}else{
+				   $('#error_msg2').html(data.msg);	//请求失败提示
+				   timeout = setTimeout(function(){$("#error_msg2").html("")},5000);
+				}
+				console.log(data);
+			},
+		});
+	}
+	return false;
+}
+
+function fget3(){
+	var timeout;
+	$('#error_msg3').html("");
+	if(verifyCheck._click()){
+		$.ajax({
+			"url":"/user/fget?step=3",
+			"data":$("#part3").serialize(),
+			"type":"POST",
+			"dataType":"json",
+			"success":function(data){
+				if(data.code==200){
+					show_tip("密码修改成功！","index.html",3);
+				   // alert(data.data.msg);
+				}else{
+				   $('#error_msg3').html(data.msg);	//请求失败提示
+				   timeout = setTimeout(function(){$("#error_msg3").html("")},5000);
+				}
+				console.log(data);
+			},
+		});
+	}
+	return false;
+}
+
+
+//修改用户头像
+// 获取本地上传的照片路径
+function getPath(obj) {
+	if (obj) {
+		//ie
+		if (window.navigator.userAgent.indexOf("MSIE") >= 1) {
+			obj.select();
+			// IE下取得图片的本地路径
+			return document.selection.createRange().text;
+		}
+		//firefox
+		else if (window.navigator.userAgent.indexOf("Firefox") >= 1) {
+			if (obj.files) {
+				// Firefox下取得的是图片的数据
+				return obj.files.item(0).getAsDataURL();
+			}
+			return obj.value;
+		}
+		return obj.value;
+	}
+}
+//显示图片
+function previewPhoto() {
+	var picsrc = getPath(document.all.fileid);
+	var picpreview = document.getElementById("preview");
+	if (!picsrc) {
+		return
+	}
+	if (window.navigator.userAgent.indexOf("MSIE") >= 1) {
+		if (picpreview) {
+			try {
+				picpreview.filters.item("DXImageTransform.Microsoft.AlphaImageLoader").src = picsrc;
+			} catch (ex) {
+				alert("文件路径非法，请重新选择！");
+				return false;
+			}
+		} else {
+			// var imgNode=document.createElement('img');
+			// imgNode.src = picsrc;
+			// picpreview.appendChild(imgNode);
+			picpreview.src = picsrc;
+		}
+	}
+}
+function preImg(fileid, imgid) {
+	if (typeof FileReader == 'undefined') {
+		var picsrc = getPath(document.all.fileid)
+		$("#imgid").attr({
+			src: picsrc
+		});
+		previewPhoto();
+	} else {
+		var reader = new FileReader();
+		var name = $("#fileid").val();
+		var picpreview = document.getElementById("preview");
+		reader.onload = function (e) {
+			// var img = document.getElementById(imgid);
+			// var imgNode=document.createElement('img');
+			// imgNode.src = this.result;
+			// //img.src = this.result;
+			// picpreview.appendChild(imgNode);
+			picpreview.src = this.result;
+		}
+		reader.readAsDataURL(document.getElementById(fileid).files[0]);
+	}
+}
+
 (function($) {
 	var h, timerC = 60,
 		opt;
@@ -125,8 +446,36 @@
 			var d = this;
 			if (b.code) {
 				$("#verifyYz").click(function() {
-					$("#time_box").text("60 s后可重发");
-					d._sendVerify()
+					var timeout;
+					var timeout2;
+					$("#error_msg2").html("");
+					var email_type = $("#verifyYz")[0].getAttribute("data-set");
+					var csrfmiddlewaretoken = $("[name=csrfmiddlewaretoken]")[0].value;
+					if(email_type==3){
+						data = {"email":$("#reg_email").val(),"randCode":$("#randCode").val(), "csrfmiddlewaretoken": csrfmiddlewaretoken}
+					}else{
+						data = {"email":$("#reg_email").val(), "csrfmiddlewaretoken": csrfmiddlewaretoken}
+					}
+					$.ajax({
+						"url":"/api/email_vail?type="+email_type,
+						"data":data,
+						"type":"POST",
+						"dataType":"json",
+						"success":function(data){
+							if(data.code==200){
+								$("#time_box").text("60 s后可重发");
+								d._sendVerify()
+								$('#error_msg2').html(data.data.msg);
+								timeout2 = setTimeout(function(){$("#verifyYz").show();$("#time_box").hide();clearTimeout(h);},60000);
+							}else{
+								$('#error_msg2').html(data.msg);	//请求失败提示
+								$("#verifyYz").show();
+								$("#time_box").hide();
+							}
+							timeout = setTimeout(function(){$("#error_msg2").html("")},5000);
+							console.log(data);
+						},
+					});
 				})
 			}
 			$('body').on({
@@ -634,70 +983,3 @@ $(function() {
     };
 }(jQuery);
 
-
-    //修改用户头像
-    // 获取本地上传的照片路径 
-    function getPath(obj) {
-        if (obj) {
-            //ie 
-            if (window.navigator.userAgent.indexOf("MSIE") >= 1) {
-                obj.select();
-                // IE下取得图片的本地路径 
-                return document.selection.createRange().text;
-            }
-            //firefox 
-            else if (window.navigator.userAgent.indexOf("Firefox") >= 1) {
-                if (obj.files) {
-                    // Firefox下取得的是图片的数据 
-                    return obj.files.item(0).getAsDataURL();
-                }
-                return obj.value;
-            }
-            return obj.value;
-        }
-    }
-     //显示图片
-    function previewPhoto() {
-        var picsrc = getPath(document.all.fileid);
-        var picpreview = document.getElementById("preview");
-        if (!picsrc) {
-            return
-        }
-        if (window.navigator.userAgent.indexOf("MSIE") >= 1) {
-            if (picpreview) {
-                try {
-                    picpreview.filters.item("DXImageTransform.Microsoft.AlphaImageLoader").src = picsrc;
-                } catch (ex) {
-                    alert("文件路径非法，请重新选择！");
-                    return false;
-                }
-            } else {
-                var imgNode=document.createElement('img');
-                imgNode.src = picsrc;
-                picpreview.appendChild(imgNode);
-            }
-        }
-    }
-    function preImg(fileid, imgid) {
-        if (typeof FileReader == 'undefined') {
-            var picsrc = getPath(document.all.fileid)
-            $("#imgid").attr({
-                src: picsrc
-            });
-            previewPhoto();
-        } else {
-            var reader = new FileReader();
-            var name = $("#fileid").val();
-            var picpreview = document.getElementById("preview");
-            reader.onload = function (e) {
-                var img = document.getElementById(imgid);
-                var imgNode=document.createElement('img');
-                imgNode.src = this.result;
-                //img.src = this.result;
-                picpreview.appendChild(imgNode);
-            }
-            reader.readAsDataURL(document.getElementById(fileid).files[0]);
-        }
-    }
-    
-    

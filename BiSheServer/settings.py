@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-
+import mimetypes
 from pathlib import Path
 import os
 
@@ -19,14 +19,20 @@ import configparser
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # 加载外部配置信息
-TEST_CONF_DIR = os.path.join(BASE_DIR, "config\conf.ini")
-CONFIG = configparser.ConfigParser()
+TEST_CONF_DIR = os.path.join(BASE_DIR, "config/conf.ini")
+# CONFIG = configparser.ConfigParser()
+CONFIG = configparser.RawConfigParser()
 CONFIG.read(TEST_CONF_DIR, encoding='utf-8')
 default = CONFIG.defaults()
 # CONFIG.get('cmd', 'startserver')
 
 # 其余配置变量
-FONT_PATH = 'file/汉仪中楷简.ttf'   #设置字体样式，支持TTF等文件格式
+FONT_PATH = 'file/汉仪中楷简.ttf'  # 设置字体样式，支持TTF等文件格式
+
+# 告知Django认证系统使用我们自定义的模型类
+# AUTH_USER_MODEL = 'user.UsersBase'
+# AUTH 方法（支持邮箱登录） 自定义认证系统
+# AUTHENTICATION_BACKENDS = ('user.views.CustomBackend',)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -34,18 +40,8 @@ FONT_PATH = 'file/汉仪中楷简.ttf'   #设置字体样式，支持TTF等文�
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'tej=6wda3t#ct&ncym!*d&d&mq-*)-1ztxz%zp(%_ewbg%4cke'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = default["debug"]
-
-ALLOWED_HOSTS = default["allowed_hosts"]
-
-INTERNAL_IPS = [
-    '127.0.0.1',
-    'localhost'
-]
-# Application definition
-
 INSTALLED_APPS = [
+    'simpleui',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -57,13 +53,54 @@ INSTALLED_APPS = [
     'user',
     'api',
     'TestServer',
+    'rest_framework',
+    'django_apscheduler',  # 定时执行任务
+    # 'django_crontab',  # 定时任务，只能在Linux下使用
     # 开发时使用
-    'django_extensions',
-    'debug_toolbar',
+    # 'django_extensions',
+    # 'debug_toolbar',
 ]
 
-MIDDLEWARE = [
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+MIDDLEWARE = []
+
+# SECURITY WARNING: don't run with debug turned on in production!
+
+ALLOWED_HOSTS = ['*']
+
+if default["debug"] == 'False':
+    DEBUG = False
+    STATIC_ROOT = os.path.join(BASE_DIR, default["static_home"])
+else:
+    DEBUG = True
+    INTERNAL_IPS = [
+        '127.0.0.1',
+        'localhost'
+    ]
+    INSTALLED_APPS.append('django_extensions')
+    INSTALLED_APPS.append('debug_toolbar')
+
+    MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
+
+    DEBUG_TOOLBAR_PANELS = [
+        'debug_toolbar.panels.timer.TimerPanel',
+        'debug_toolbar.panels.headers.HeadersPanel',
+        'debug_toolbar.panels.request.RequestPanel',
+        'debug_toolbar.panels.sql.SQLPanel',
+        'debug_toolbar.panels.cache.CachePanel',
+        'debug_toolbar.panels.logging.LoggingPanel',
+    ]
+
+    DEBUG_TOOLBAR_CONFIG = {
+        'JQUERY_URL': 'https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js',
+        'SHOW_COLLAPSED': True,
+        'SHOW_TOOLBAR_CALLBACK': lambda x: True,
+    }
+    STATICFILES_DIRS = (
+        os.path.join(os.path.dirname(__file__), "../" + default["static_home"]).replace('\\', '/'),
+    )
+
+MIDDLEWARE = MIDDLEWARE + [
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -71,30 +108,24 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'request_logging.middleware.LoggingMiddleware',
+    'api.middleware_log.ApiLoggingMiddleware',
 ]
 
-DEBUG_TOOLBAR_PANELS = [
-    'debug_toolbar.panels.timer.TimerPanel',
-    'debug_toolbar.panels.headers.HeadersPanel',
-    'debug_toolbar.panels.request.RequestPanel',
-    'debug_toolbar.panels.sql.SQLPanel',
-    'debug_toolbar.panels.cache.CachePanel',
-    'debug_toolbar.panels.logging.LoggingPanel',
-]
+# ALLOWED_HOSTS = default["allowed_hosts"]
 
-DEBUG_TOOLBAR_CONFIG = {
-    'JQUERY_URL': 'https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js',
-    'SHOW_COLLAPSED': True,
-    'SHOW_TOOLBAR_CALLBACK': lambda x: True,
-}
+
+# ALLOWED_HOSTS = [
+#     '127.0.0.1',
+#     'localhost'
+# ]
 
 ROOT_URLCONF = 'BiSheServer.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, default["templates_home"])]
-        ,
+        'DIRS': [os.path.join(BASE_DIR, default["templates_home"])],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -123,14 +154,30 @@ WSGI_APPLICATION = 'BiSheServer.wsgi.application'
 #     }
 # }
 
+# REDIS_URI = "redis://:%s@%s:%s/%s" % (CONFIG.get('REDIS', 'REDIS_PASSWORD'), CONFIG.get('REDIS', 'REDIS_HOST'),
+# CONFIG.get('REDIS', 'REDIS_PORT'), CONFIG.get('REDIS', 'REDIS_DB'))
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django_redis.cache.RedisCache',
+#         'LOCATION': REDIS_URI,
+#         'TIMEOUT': 86400,  # 1 day,0缓存将失效,None永不过期
+#         'OPTIONS': {
+#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#            'MAX_ENTRIES': 1000,
+#            #'CULL_FREQUENCY': 3,
+#         },
+#         "KEY_PREFIX":""  #缓存key的前缀（默认空）
+#     }
+# }
+
 DATABASES = {
-    'default':{
+    'default': {
         'ENGINE': CONFIG.get('DATEBASE', 'DATABASES_ENGINE'),    # 数据库引擎
-        'NAME': CONFIG.get('DATEBASE', 'DATABASES_NAME'), # 数据库名称
-        'HOST': CONFIG.get('DATEBASE', 'DATABASES_HOST'), # 数据库地址，本机 ip 地址 127.0.0.1
-        'PORT': CONFIG.get('DATEBASE', 'DATABASES_PORT'), # 端口
+        'NAME': CONFIG.get('DATEBASE', 'DATABASES_NAME'),  # 数据库名称
+        'HOST': CONFIG.get('DATEBASE', 'DATABASES_HOST'),  # 数据库地址，本机 ip 地址 127.0.0.1
+        'PORT': CONFIG.get('DATEBASE', 'DATABASES_PORT'),  # 端口
         'USER': CONFIG.get('DATEBASE', 'DATABASES_USER'),  # 数据库用户名
-        'PASSWORD': CONFIG.get('DATEBASE', 'DATABASES_PASSWORD'), # 数据库密码
+        'PASSWORD': CONFIG.get('DATEBASE', 'DATABASES_PASSWORD'),  # 数据库密码
         'OPTIONS': {
             'init_command': 'SET sql_mode="STRICT_TRANS_TABLES"',
             'charset': 'utf8mb4'
@@ -160,44 +207,82 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
+# LANGUAGE_CODE = 'en-us'
+#
+# TIME_ZONE = 'UTC'
+LANGUAGE_CODE = 'zh-hans'
+# 时区
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
 USE_L10N = True
-
-USE_TZ = True
-
+# 如果不设置为false, 则在数据库添加时间的时候是UTC时间
+USE_TZ = False
+# USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 # 静态目录配置
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, "/"+default["static_home"]+"/")
-STATICFILES_DIRS = (
-    # os.path.join(BASE_DIR, 'static'),
-    os.path.join(os.path.dirname(__file__), "../"+default["static_home"]+"/").replace('\\', '/'),
-)
+# STATIC_ROOT = os.path.join(BASE_DIR, "static")
+# STATIC_ROOT = os.path.join(BASE_DIR,"/static/")
+# STATIC_ROOT = os.path.join(BASE_DIR, default["static_home"])
+# STATIC_ROOT = os.path.join(BASE_DIR, "/"+default["static_home"]+"/")
+# STATICFILES_DIRS = (
+#     # os.path.join(BASE_DIR, 'static'),
+#     # os.path.join(BASE_DIR, "/" + default["static_home"] + "/"),
+#     os.path.join(os.path.dirname(__file__), "../"+default["static_home"]).replace('\\', '/'),
+# )
+
+
+# MEDIA_URL = "/file/"
+# MEDIA_ROOT = os.path.join(BASE_DIR, "file")
+
+
+# SESSION配置
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # 引擎（默认）
+SESSION_COOKIE_NAME = "sessionid"  # Session的cookie保存在浏览器上时的key，即：sessionid＝随机字符串（默认）
+SESSION_COOKIE_PATH = "/"  # Session的cookie保存的路径（默认）
+SESSION_COOKIE_DOMAIN = None  # Session的cookie保存的域名（默认）
+SESSION_COOKIE_SECURE = False  # 是否Https传输cookie（默认）
+SESSION_COOKIE_HTTPONLY = True  # 是否Session的cookie只支持http传输（默认）
+SESSION_COOKIE_AGE = 1209600  # Session的cookie失效日期（2周）（默认）
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # 是否关闭浏览器使得Session过期（默认False）
+SESSION_SAVE_EVERY_REQUEST = False  # 是否每次请求都保存Session，默认修改之后才保存（默认）
+
 
 # 相关日志配置
 BASE_LOG_DIR = os.path.join(BASE_DIR, default["log_home"])
+
+# # 设置定时执行计划任务
+# CRONJOBS = [
+#     # 每天凌晨1点执行日志上传任务
+#     # ('0 1 * * *', 'api.upload_log.Transfer.upload_hadoop_log', '>> ' +
+#     #  os.path.join(BASE_LOG_DIR, 'upload_hadoop_crontab.log')),
+#     # 每天凌晨1点执行日志上传任务
+#     ('*/2 * * * *', 'api.upload_log.Transfer().upload_hadoop_log', '>> ' +
+#      os.path.join(BASE_LOG_DIR, 'upload_hadoop_crontab.log'))
+# ]
+# # 设置中文支持
+# CRONTAB_COMMAND_PREFIX = 'LANG_ALL=zh_cn.UTF-8'
+
+LOG_SUFFIX = CONFIG.get('HADOOP_LOG', 'LOG_SUFFIX')
+
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,
+    'disable_existing_loggers': True,
     'formatters': {
         'standard': {
-            'format': '[%(asctime)s][%(threadName)s:%(thread)d][task_id:%(name)s][%(filename)s:%(lineno)d]'
-                      '[%(levelname)s][%(message)s]'
+            'format': '%(asctime)s FuncName:%(funcName)s LINE:%(lineno)d [%(levelname)s]- %(message)s'
         },
         'simple': {
-            'format': '[%(levelname)s][%(asctime)s][%(filename)s:%(lineno)d]%(message)s'
+            'format': '%(levelname)s %(message)s'
         },
-        'collect': {
-            'format': '%(message)s'
-        }
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(funcName)s %(message)s'
+        },
     },
     'filters': {
         'require_debug_true': {
@@ -207,82 +292,105 @@ LOGGING = {
     'handlers': {
         'console': {
             'level': 'DEBUG',
-            'filters': ['require_debug_true'],  # 只有在Django debug为True时才在屏幕打印日志
             'class': 'logging.StreamHandler',
-            'formatter': 'simple'
-        },
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_LOG_DIR, "mysite_file.log"),  #这是将普通日志写入到日志文件中的方法，
-            'formatter': 'standard',
-            'encoding': 'utf-8',
+            'formatter': 'standard'
         },
         'default': {
-            'level':'DEBUG',
-            'class':'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_LOG_DIR, "mysite_default.log"),     #日志输出文件
-            'maxBytes': 1024*1024*5,                  #文件大小
-            'backupCount': 5,                         #备份份数
-            'formatter':'standard',                   #使用哪种formatters日志格式
-            'encoding': 'utf-8',
-        },
-        # 'log': {
-        #     'level': 'INFO',
-        #     'class': 'logging.handlers.RotatingFileHandler',  # 保存到文件，根据文件大小自动切
-        #     'filename': os.path.join(BASE_LOG_DIR, "mysite_info.log"),  # 日志文件
-        #     'maxBytes': 1024 * 1024 * 50,  # 日志大小 50M
-        #     'backupCount': 3,  # 备份数为3  xx.log --> xx.log.1 --> xx.log.2 --> xx.log.3
-        #     'formatter': 'standard',
-        #     'encoding': 'utf-8',
-        # },
-        'TF': {
-            'level': 'INFO',
-            'class': 'logging.handlers.TimedRotatingFileHandler',  # 保存到文件，根据时间自动切
-            'filename': os.path.join(BASE_LOG_DIR, "mysite_info.log"),  # 日志文件
-            'backupCount': 3,  # 备份数为3  xx.log --> xx.log.2018-08-23_00-00-00 --> xx.log.2018-08-24_00-00-00 --> ...
-            'when': 'D',  # 每天一切， 可选值有S/秒 M/分 H/小时 D/天 W0-W6/周(0=周一) midnight/如果没指定时间就默认在午夜
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_LOG_DIR, 'mysite_info.log'),
+            'maxBytes': 1024*1024*50,   # 50 MB
+            'backupCount': 2,
             'formatter': 'standard',
-            'encoding': 'utf-8',
+            "encoding": "utf8"
         },
-        'error': {
-            'level': 'ERROR',
-            'class': 'logging.handlers.RotatingFileHandler',  # 保存到文件，自动切
-            'filename': os.path.join(BASE_LOG_DIR, "mysite_err.log"),  # 日志文件
-            'maxBytes': 1024 * 1024 * 5,  # 日志大小 50M
-            'backupCount': 5,
+        'default_debug': {
+            'level': 'DEBUG',
+            'class': 'api.MidnightRotatingFileHandler.MultiProcessSafeDailyRotatingFileHandler',
+            'filename': os.path.join(BASE_LOG_DIR, 'mysite_debug'),
+            # 'maxBytes': 1024*1024*50,  # 50 MB
+            # 'backupCount': 2,
+            'utc': False,
+            'suffix': LOG_SUFFIX,
+            # 'when': 'M',  # 每天一切， 可选值有S/秒 M/分 H/小时 D/天 W0-W6/周(0=周一) midnight/如果没指定时间就默认在午夜
             'formatter': 'standard',
-            'encoding': 'utf-8',
+            "encoding": "utf8"
         },
-        'warning': {
-            'level': 'WARNING',
-            'class': 'logging.handlers.RotatingFileHandler',  # 保存到文件，自动切
-            'filename': os.path.join(BASE_LOG_DIR, "mysite_warning.log"),  # 日志文件
-            'maxBytes': 1024 * 1024 * 5,  # 日志大小 50M
-            'backupCount': 5,
+        'request_handler': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_LOG_DIR, 'mysite_common.log'),
+            'maxBytes': 1024*1024*50,  # 50 MB
+            'backupCount': 2,
             'formatter': 'standard',
-            'encoding': 'utf-8',
+            "encoding": "utf8"
         },
-        'collect': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',  # 保存到文件，自动切
-            'filename': os.path.join(BASE_LOG_DIR, "mysite_collect.log"),
-            'maxBytes': 1024 * 1024 * 50,  # 日志大小 50M
-            'backupCount': 5,
-            'formatter': 'collect',
-            'encoding': "utf-8"
-        }
+        'restful_api': {
+            'level': 'DEBUG',
+            # 'class': 'logging.handlers.TimedRotatingFileHandler',
+            'class': 'api.MidnightRotatingFileHandler.MultiProcessSafeDailyRotatingFileHandler',
+            'filename': os.path.join(BASE_LOG_DIR, 'mysite_api'),
+            # 'maxBytes': 1024*1024*50,  # 50 MB
+            'utc': False,
+            'suffix': LOG_SUFFIX,
+            # 'when': 'S',  # 每天一切， 可选值有S/秒 M/分 H/小时 D/天 W0-W6/周(0=周一) midnight/如果没指定时间就默认在午夜
+            'formatter': 'verbose',
+            "encoding": "utf8"
+        },
     },
     'loggers': {
-        '': {  # 默认的logger应用如下配置
-            'handlers': ['TF', 'console', 'error', 'warning'],  # 上线之后可以把'console'移除
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'collect': {  # 名为 'collect'的logger还单独处理
-            'handlers': ['console', 'collect'],
+        'django': {
+            'handlers': ['console', 'default_debug'],
             'level': 'INFO',
-        }
-    },
+            'propagate': False
+        },
+        'django.request': {
+            'handlers': ['request_handler'],
+            'level': 'INFO',
+            'propagate': False
+        },
+        'common': {
+            'handlers': ['default', 'console'],
+            'level': 'INFO',
+            'propagate': True
+        },
+        'api': {
+            'handlers': ['restful_api'],
+            'level': 'INFO',
+            'propagate': True
+        },
+    }
 }
-LOGGING = ""
+
+if default["use_log"] == 'False':
+    # print("不使用日志配置")
+    LOGGING = ""
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_WHITELIST = (
+# 	'*'
+# )
+CORS_ALLOW_METHODS = (
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+    'VIEW',
+)
+
+CORS_ALLOW_HEADERS = (
+    'XMLHttpRequest',
+    'X_FILENAME',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'Pragma',
+)

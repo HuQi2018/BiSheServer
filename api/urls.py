@@ -13,11 +13,12 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path, include
-from api import captcha
+from django.urls import path
+from api import captcha, email_vail, districts
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
     path('captcha', captcha.get_code),    # 验证码
+    path('districts', districts.findByParent.as_view()),    # 获取地址信息关联
+    path('email_vail', email_vail.send_reg_email.as_view()),    # 发送邮箱验证码
 ]

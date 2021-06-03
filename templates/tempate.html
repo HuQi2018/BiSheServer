@@ -1,0 +1,40 @@
+<html lang="zh-cn">
+    {% load set_var  %}
+    <head>
+        <title>Zero影院</title>
+        {% include "include/head.html" %}
+    </head>
+    
+    <body class="home">
+        {% include "include/nav.html" %}
+        <div id="main">
+            {% include "include/tag.html" %}
+            <div class="mikd">
+                <div class="mi_btcon" style="padding: 20px;">
+                    <center><h2 style="font-size: 1.35em;">{{ title }}</h2></center>
+                </div>
+            </div>
+            {{ content }}
+            {% if page %}
+                {% with "include/"|add:page as template %}
+                    {% include template %}
+                {% endwith %}
+            {% endif %}
+{#            <div id="mikd">#}
+{#                <div class="mi_btcon" style="padding: 20px;">#}
+{#                    <center><h2 style="font-size: 1.35em;">{{ content }}</h2></center>#}
+{#                </div>#}
+{#                <center><h3 style="font-size: 1.35em;">{{ content }}</h3></center>#}
+{#                {% with "include/"|add:page as template %}#}
+{#                    {% include template %}#}
+{#                {% endwith %}#}
+{#            </div>#}
+            <script type="text/javascript" charset="utf-8">
+                show_tip("{{ tip }}","{{ url }}",{{ time }});
+            </script>
+        </div>
+        
+        {% include "include/footer.html" %}
+    </body>
+
+</html>

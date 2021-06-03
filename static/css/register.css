@@ -20,8 +20,8 @@ label{ margin:0; font-weight:normal;}
 .reg-box-pan{ padding:40px 40px 50px; width:100%;}
 .txt03{width:270px;line-height: 16px;padding:9px 10px;border: 1px solid #cccccc;float: none;font-size: 14px;font-family: arial,"宋体";color: #999;overflow: hidden;}
 .reg-box .item {height:68px;line-height:34px;position: relative;z-index:5;margin-top: 20px;}
-.reg-box .intelligent-label {width:100px;text-align: right;font-size: 14px;color: #666;padding-right: 10px;font-weight: bold;}
-.reg-box .intelligent-label b{font-family: "????";margin-right: 5px;font-weight: normal; color:red;}
+.reg-box .intelligent-label {width:110px;text-align: right;font-size: 14px;color: #666;padding-right: 10px;font-weight: bold;}
+.reg-box .intelligent-label b{font-family: "宋体";margin-right: 5px;font-weight: normal; color:red;}
 .reg-box .item .item-ifo{position: relative;width: 270px;}
 .reg-box .txt02{width:270px;line-height: 16px;padding:9px 10px;border: 1px solid #cccccc;float: none;font-size: 14px;font-family: arial,"宋体";color: #999;overflow: hidden;}
 .reg-box .txt03 {height: 2.75em;}
@@ -50,11 +50,11 @@ label{ margin:0; font-weight:normal;}
 .part4 .f-size18{color: black;}
 
 
-#preview img{
+#preview{
     border-radius: 50%;
     overflow: hidden;
     width: 109px;
-    height: 119px;
+    height: 109px;
     margin-bottom: 10px;
 }
 
@@ -196,7 +196,7 @@ a {
     position: relative;
     margin-top: 40px;
     display: flex;
-    z-index: 1002;
+    /*z-index: 1002;*/
     background: #fff;
 }
 
@@ -274,7 +274,7 @@ a {
     overflow: hidden;
     display: block;
     text-overflow: ellipsis;
-    font-size: 1.95rem;
+    font-size: 16px;
     color: #333;
 }
 
@@ -360,4 +360,49 @@ a {
     background:#ffffff;
     color:#fd8238;
     box-shadow:0 1px 10px #d6d6d6;
+}
+
+
+
+/*用户信息编辑页面*/
+.user_info{
+    display: flex;
+    text-align: center;
+    padding: 30px;
+}
+.user_info .input,#saveSetting,#saveSetting_cancel{
+    display: none;
+}
+.user_info .info{
+    display: block;
+    border-bottom: 1px solid;
+}
+#user_info.reg-box .item{
+    height: auto;
+}
+/*.reg-box .item .item-ifo{*/
+/*    border-bottom: 1px solid;*/
+/*}*/
+#user_info.reg-box .focus, #user_info.reg-box .focusa, #user_info.reg-box .error{
+    left:230px;
+}
+.forbidden{
+    pointer-events: none;
+}
+#user_type.aui-flexView{
+    height: auto;
+    margin: 0 50px 0 100px;
+    width: auto;
+}
+#user_info .preview{
+    border-radius: 50%;
+    overflow: hidden;
+    width: 109px;
+    height: 109px;
+    margin-bottom: 10px;
+}
+#user_password_modify,#user_email_modify{
+    width: 600px;
+    left: 25%;
+    position: relative;
 }
