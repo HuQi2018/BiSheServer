@@ -18,12 +18,16 @@ class User:
     @staticmethod
     def getUserPreferTag(user_id):
         user_prefer_tag_rs = UsersDetail.objects.filter(user_id_id=user_id).values_list("user_prefer", flat=True)[0]
+        if not user_prefer_tag_rs:
+            return ""
         return user_prefer_tag_rs
 
     # 获取用户的兴趣爱好
     @staticmethod
     def getUserHobbiesTag(user_id):
         user_obbies_tag_rs = UsersDetail.objects.filter(user_id_id=user_id).first().values("user_hobbies")
+        if not user_obbies_tag_rs:
+            return ""
         return user_obbies_tag_rs
 
     # 获取所有的爱好标签

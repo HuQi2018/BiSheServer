@@ -331,7 +331,8 @@ class Movie:
         #                                                      "-moviepubdatedb__pubdate")\
         #     .filter(movie_id__in=index_tag_movie_rs_list).all()
         # index_tag_movie_rs_json = queryset_to_json(index_tag_movie_rs)
-        index_tag_movie_rs_list = random.sample(index_tag_movie_rs_list[:300], 5)
+        if len(index_tag_movie_rs_list) > 4:
+            index_tag_movie_rs_list = random.sample(index_tag_movie_rs_list[:300], 5)
         index_tag_movie_rs = []
         for movie_id in index_tag_movie_rs_list:
             index_tag_movie_rs.append(self.movie_search_by_id(movie_id))
@@ -514,7 +515,10 @@ class Movie:
         if user_movie_tag_cai_rs_json:
             return user_movie_tag_cai_rs_json
 
-        movie_id_li = UserMovieRecommend.objects.get(user_id=user_id).movie_id_li.split("，")
+        user_movie_recommend = UserMovieRecommend.objects.filter(user_id=user_id)
+        if not user_movie_recommend.exists():
+            return []
+        movie_id_li = user_movie_recommend.get(user_id=user_id).movie_id_li.split("，")
         if len(movie_id_li) < 5:
             user_tag_li = UserTag.objects.filter(Q(tag_type="info_movie_type") & Q(user_id=user_id))\
                 .order_by("-tag_weight").values_list("tag_name", flat=True)
