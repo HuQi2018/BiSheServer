@@ -1,9 +1,11 @@
 # BiSheServer
 
 ### 1、项目介绍
-​		本系统为我的本科毕业设计项目，毕设题目为“基于用户画像的电影推荐系统的设计与实现”。
+> 本系统为我的本科毕业设计项目，毕设题目为“基于用户画像的电影推荐系统的设计与实现”。
 
-​		本系统是以Django作为基础框架，采用MTV模式，数据库使用MongoDB、MySQL和Redis，以从豆瓣平台爬取的电影数据作为基础数据源，主要基于用户的基本信息和使用操作记录等行为信息来开发用户标签，并使用Hadoop、Spark大数据组件进行分析和处理的推荐系统。管理系统使用的是Django自带的管理系统，并使用simpleui进行了美化。
+> 本系统是以Django作为基础框架，采用MTV模式，数据库使用MongoDB、MySQL和Redis，以从豆瓣平台爬取的电影数据作为基础数据源，主要基于用户的基本信息和使用操作记录等行为信息来开发用户标签，并使用Hadoop、Spark大数据组件进行分析和处理的推荐系统。管理系统使用的是Django自带的管理系统，并使用simpleui进行了美化。
+
+> 欢迎各位继续完善、改进该系统，遇到问题可提 Issues，或直接发邮件、QQ联系我。
 
 ### 2、系统架构图
 ![](static/images/other/jiagou.png)
@@ -142,8 +144,7 @@
 
 ### 6、安装配置说明
     当外部配置完成后，可将本系统根目录中config/conf.ini文件打开，然后修改其中的配置。首先是系统的默认配置服务、MySql数据库配置、Redis数据库配置、邮件验证系统配置和Hadoop等配置。
-    将项目目录下spark/jars文件夹中的mysql-connector-java-8.0.24.jar文件复制到spark的jars目录下。
-    修改spark目录下的spark.py文件中的spark配置和mysql配置，将其上传到Linux下，加入Linux定时任务每日执行。运行命令：python3 ./spark.py
+    
     在项目目录运行命令，创建表结构，同时创建Django管理系统的管理员帐号：
     python manage.py makemigrations user movie api
     python manage.py migrate
@@ -155,6 +156,12 @@
     mysql> source sys.sql
     上述所有工作都准备完成后使用命令启动该系统服务：python manage.py runserver 0.0.0.0:8001
     （8001为端口号，可根据需求更换，0.0.0.0表示所有主机都可访问，若设置为127.0.0.1，则表示只可本地访问）
+    
+    离线处理（可选部分）
+    将项目目录下spark/jars文件夹中的mysql-connector-java-8.0.24.jar文件复制到spark的jars目录下。
+    修改spark目录下的spark.py文件中的spark配置和mysql配置，将其上传到Linux下，加入Linux定时任务每日执行。运行命令：python3 ./spark.py   ，即可每日自动处理离线数据，精准推荐，推荐方式同时包含基于电影内容（基于内容）、基于用户相似度（基于协同过滤）推荐的方式。后期如有兴趣的同学还可完善改为实时推荐。
+    
+    同系统安装说明书里的Hadoop、Spark组件都是可选部分，只用于离线处理部分，不安装也可运行整个系统
 
 ### [7、系统安装使用说明书](电影推荐系统的实现效果.pdf)
 
@@ -178,3 +185,11 @@ django.core.exceptions.ImproperlyConfigured: mysqlclient 1.3.13 or newer is requ
 
 遇见此错误时，找到对应代码文件中的判断版本的两行代码，前面加注释“# ”，忽略错误。
 ```
+
+### 10、开源许可
+- [Apache-2.0 License](https://github.com/HuQi2018/BiSheServer/blob/master/LICENSE)
+- **如有引用和转载，请注明出处**
+
+### 11、引用参考
+- [recommenderSystemBasedOnSpark](https://github.com/toughhou/recommenderSystemBasedOnSpark)
+
