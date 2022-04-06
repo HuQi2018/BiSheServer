@@ -144,6 +144,9 @@
 
 ### 6、安装配置说明
     当外部配置完成后，可将本系统根目录中config/conf.ini文件打开，然后修改其中的配置。首先是系统的默认配置服务、MySql数据库配置、Redis数据库配置、邮件验证系统配置和Hadoop等配置。
+    邮件系统主要用于用户注册使用，若无邮件服务，可选择关闭，关闭后会直接提示验证码输入即可。
+    Hadoop、Spark用于离线推荐分析，若无该需求，可选择关闭。
+    注意在创建数据库时请注意将数据库的字符编码设置为utf-8编码集，否则运行命令“python manage.py migrate”会报错，请注意。
     
     在项目目录运行命令，创建表结构，同时创建Django管理系统的管理员帐号：
     python manage.py makemigrations user movie api
