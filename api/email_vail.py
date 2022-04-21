@@ -36,7 +36,7 @@ class send_reg_email(APIView):
                     raise Exception
             except:
                 return JsonError("请先完成第一步注册！")
-            if UsersBase.objects.filter(Q(user_mail=user_email)).exists():
+            if UsersBase.objects.filter(Q(user_mail=user_email)).exclude(user_reg_step=1).exists():
                 return JsonError("邮箱已存在，请更换！")
             title = "注册验证邮件"
             request.session['email_verify_code'] = [email_verify_code, time.time()]  # code加入到session中

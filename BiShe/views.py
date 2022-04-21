@@ -63,6 +63,7 @@ def index(request):
         # data['movie_nav_tag'] = []
     else:
         user_tag = getUserPreferTag(user_id).split(",")
+        user_tag.remove('')
         if len(user_tag) < 4:
             # 不够4个就用default_tag填补，求差集
             other_tag = [i for i in default_tag if i not in user_tag]
