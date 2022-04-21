@@ -1,7 +1,8 @@
 import ast
 import collections
 import datetime
-
+import findspark
+findspark.init()
 import math
 import numpy as np
 import pandas as pd
@@ -9,11 +10,18 @@ from pyspark import Row, SparkContext, SparkConf
 from pyspark.sql import SQLContext
 from pyspark.sql.functions import col
 
+# 该文件为系统的电影推荐的spark离线处理脚本
+# 可放置linux下单独运行，只需在liunx下安装python3同时安装相应的库即可运行
+# 当然也可放置在windows下运行，但环境配置较复杂容易出错，不建议
+# 内部需要改动mysql数据库配置信息（35行）、spark信息（24行）、hadoop信息（39行）
+# 注：该脚本做了数据量的限制，于  221行 可以取消数据量的限制
+
+
 
 class Calculator:
     def __init__(self):
         self.localClusterURL = "local[2]"
-        self.clusterMasterURL = "spark://Spark:7077"
+        self.clusterMasterURL = "spark://master:7077"
         self.conf = SparkConf().setAppName('Movie_System').setMaster(self.clusterMasterURL)
         self.sc = SparkContext.getOrCreate(self.conf)
         self.sqlContext = SQLContext(self.sc)
@@ -21,14 +29,14 @@ class Calculator:
         # self.sqlContext = SparkSession.Builder().appName('sql').master('spark://Spark:7077').getOrCreate()
 
         # mysql 配置
-        self.prop = {'user': 'sql_bs_sju_site',
-                     'password': 'xzDPV7JL79w3Epg',
+        self.prop = {'user': '127_0_0_1',
+                     'password': 'RjHysK3TfjSdGwmJ',
                      'driver': 'com.mysql.cj.jdbc.Driver'}
-        self.jdbcURL = "jdbc:mysql://127.0.0.1:3306/sql_bs_sju_site" \
+        self.jdbcURL = "jdbc:mysql://172.19.107.58:3306/127_0_0_1" \
                        "?useUnicode=true&characterEncoding=utf-8&useSSL=false"
 
         #  user\rating\links\tags在hdfs中的位置 ===> 即推荐原料在hdfs中的存档路径
-        self.hdfs_data_path = 'hdfs://Spark:9000/movie_system/'
+        self.hdfs_data_path = 'hdfs://master:9000/movie_system/'
 
         self.date_time = datetime.datetime.now().strftime("%Y-%m-%d")
 
@@ -264,6 +272,11 @@ def countSimBetweenTwoList(list1, list2):
     s1 = len(list1)
     s2 = len(list2)
     m = math.sqrt(s1 * s2)
+    if m == 0:
+        if s1 == 0 and s2 == 0:
+            return 1
+        else:
+            return 0
     return countIntersectionForTwoSets(list1, list2) / m
 
 
@@ -287,10 +300,10 @@ def countSimBetweenTwoMovie(list1, list2):
 
 def countSimBetweenTwoUser(list1, list2):
     """计算两个User的相似度"""
-    user_prefer_list1 = list1['prefers'].split(",")
-    user_prefer_list2 = list2['prefers'].split(",")
-    user_hobbie_list1 = list2['hobbies'].split(",")
-    user_hobbie_list2 = list2['hobbies'].split(",")
+    user_prefer_list1 = list1['prefers'].split(",") if list1['prefers'] == '' else []
+    user_prefer_list2 = list2['prefers'].split(",") if list2['prefers'] == '' else []
+    user_hobbie_list1 = list1['hobbies'].split(",") if list1['hobbies'] == '' else []
+    user_hobbie_list2 = list2['hobbies'].split(",") if list2['hobbies'] == '' else []
     user_gender = 1 if list1['gender'] == list2['gender'] else 0
     user_province = 1 if list1['province'] == list2['province'] else 0
     user_city = 1 if list1['city'] == list2['city'] else 0
