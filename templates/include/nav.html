@@ -17,7 +17,7 @@
 
 {% for tag in data.movie_nav_tag %}
         <div class="nav-content">
-            <div class="h1 clear"><a href="/search.html?type=geners&s={{ tag.tag }}"><h1>{{ tag.tag }}</h1></a></div>
+            <div class="h1 clear"><a href="/search.html?type=tag&s={{ tag.tag }}"><h1>{{ tag.tag }}</h1></a></div>
             <div class="nav-meun">
                 <div class="bt_img mi_ne_kd leibox nav-show" id="movie_nav_tag_{{ forloop.counter }}">
 

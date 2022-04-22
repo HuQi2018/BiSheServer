@@ -14,12 +14,12 @@ def model_to_json(self):
     # 增强加入时间转
     # need_json = ['rating', 'pubdates', 'countries', 'aka', 'tags', 'durations', 'genres', 'videos', 'images',
     #              'photos', 'languages', 'writers', 'actor', 'summary', 'directors']
-    fields = []
-    for field in self._meta.fields:
-        fields.append(field.name)
+    # fields = []
+    # for field in self._meta.fields:
+    #     fields.append(field.name)
     d = {}
-    for attr in fields:
-        obj = getattr(self, attr)
+    for attr in self._meta.fields:
+        obj = getattr(self, attr.name)
         if isinstance(obj, datetime.datetime):
             rs = obj.strftime('%Y-%m-%d %H:%M:%S')
         elif isinstance(obj, datetime.date):
@@ -27,7 +27,10 @@ def model_to_json(self):
         elif obj.__class__.__name__ == 'UsersBase':
             rs = obj.id
         elif obj.__class__.__name__ == 'CollectMovieDB':
-            rs = obj.title
+            if self.__class__.__name__ == 'MovieComments':
+                rs = obj.movie_id
+            else:
+                rs = obj.title
         elif isinstance(obj, Model):
             rs = obj.__str__()
         elif obj is None:
@@ -45,7 +48,7 @@ def model_to_json(self):
         #     rs = json.loads(rs.replace("'",'"'))
         #     print(rs)
         #     print(type(rs))
-        d[attr] = rs
+        d[attr.name] = rs
     return d
 
 

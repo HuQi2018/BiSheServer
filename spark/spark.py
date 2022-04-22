@@ -15,7 +15,7 @@ from pyspark.sql.functions import col
 # 当然也可放置在windows下运行，但环境配置较复杂容易出错，不建议
 # 内部需要改动mysql数据库配置信息（35行）、spark信息（24行）、hadoop信息（39行）
 # 注：该脚本做了数据量的限制，于  221行 可以取消数据量的限制
-
+# 执行完成后会将数据更新到表“user_usermovierecommend”，同时在hadoop中路径movie_system会生成计算的相关相似度文件
 
 
 class Calculator:
@@ -218,7 +218,7 @@ class Calculator:
         self.change_sql_data_to_hdfs(sql1, path1)
         # 测试时限制数量防止计算量过大
         sql2 = '(SELECT `movie_id`,`title`,`rating`,`genres`,`countries`,`languages`,`year` FROM ' \
-               'movie_collectmoviedb limit 0,50) movie_base'
+               'movie_collectmoviedb limit 0,1000) movie_base'
         path2 = self.hdfs_data_path + 'movie_base_'+self.date_time
         self.change_sql_data_to_hdfs(sql2, path2)
         # 用户信息
@@ -300,10 +300,10 @@ def countSimBetweenTwoMovie(list1, list2):
 
 def countSimBetweenTwoUser(list1, list2):
     """计算两个User的相似度"""
-    user_prefer_list1 = list1['prefers'].split(",") if list1['prefers'] == '' else []
-    user_prefer_list2 = list2['prefers'].split(",") if list2['prefers'] == '' else []
-    user_hobbie_list1 = list1['hobbies'].split(",") if list1['hobbies'] == '' else []
-    user_hobbie_list2 = list2['hobbies'].split(",") if list2['hobbies'] == '' else []
+    user_prefer_list1 = list1['prefers'].split(",") if list1['prefers'] != '' else []
+    user_prefer_list2 = list2['prefers'].split(",") if list2['prefers'] != '' else []
+    user_hobbie_list1 = list1['hobbies'].split(",") if list1['hobbies'] != '' else []
+    user_hobbie_list2 = list2['hobbies'].split(",") if list2['hobbies'] != '' else []
     user_gender = 1 if list1['gender'] == list2['gender'] else 0
     user_province = 1 if list1['province'] == list2['province'] else 0
     user_city = 1 if list1['city'] == list2['city'] else 0
