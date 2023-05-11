@@ -4,7 +4,7 @@ requests==2.22.0
 django_apscheduler==0.5.2
 django_debug_toolbar==3.2
 pandas==0.25.3
-PyMySQL==0.9.3
+PyMySQL==1.0.3
 redis==3.4.1
 PyHDFS==0.3.1
 snownlp==0.12.3
