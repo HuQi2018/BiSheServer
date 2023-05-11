@@ -1,7 +1,6 @@
 ﻿#! /bin/bash
 
-# 该脚本为centos7安装hadoop2.7的一键安装脚本（单机版）
-# jdk、hadoop、scala、spark等安装包在放数据库的放盘中有提供
+# 该环境为centos7安装hadoop2.7的一键安装脚本（单机版）
 # 使用时请注意修改15、16行的获取本机IP地址，以及修改24、25行的安装包文件存放的地址
 # 脚本运行过程中有几个步骤需要自己手动输入yes，完成免密登陆（会有提示）
 # 待安装完成会自动重启，重启后请直接运行命令“start-all.sh”启动hadoop，“start-spark-all.sh”启动spark
@@ -90,7 +89,7 @@ echo "export JAVA_HOME=/root/hadoop/jdk" >> /root/hadoop/spark/conf/spark-env.sh
 echo "export SCALA_HOME=/root/hadoop/scala" >> /root/hadoop/spark/conf/spark-env.sh
 echo "export SPARK_MASTER_IP=master" >> /root/hadoop/spark/conf/spark-env.sh
 echo "export MASTER=spark://master:7077" >> /root/hadoop/spark/conf/spark-env.sh
-echo "export SPARK_WORKER_MEMORY=1024M" >> /root/hadoop/spark/conf/spark-env.sh
+echo "export SPARK_WORKER_MEMORY=2048M" >> /root/hadoop/spark/conf/spark-env.sh
 echo "export HADOOP_INSTALL=/root/hadoop/hadoop" >> /root/hadoop/spark/conf/spark-env.sh
 echo "export HADOOP_CONF_DIR=\$HADOOP_INSTALL/etc/hadoop" >> /root/hadoop/spark/conf/spark-env.sh
 echo "export LD_LIBRARY_PATH=/root/hadoop/hadoop/lib/native" >> /root/hadoop/spark/conf/spark-env.sh
