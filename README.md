@@ -142,7 +142,7 @@
     LOG_SUFFIX = %Y-%m-%d
 
 
-### 6、安装配置说明
+### 6、[安装配置说明](Install_And_Start.md)
     当外部配置完成后，可将本系统根目录中config/conf.ini文件打开，然后修改其中的配置。首先是系统的默认配置服务、MySql数据库配置、Redis数据库配置、邮件验证系统配置和Hadoop等配置。
     邮件系统主要用于用户注册使用，若无邮件服务，可选择关闭，关闭后会直接提示验证码输入即可。
     Hadoop、Spark用于离线推荐分析，若无该需求，可选择关闭。
@@ -196,3 +196,8 @@ django.core.exceptions.ImproperlyConfigured: mysqlclient 1.3.13 or newer is requ
 ### 11、引用参考
 - [recommenderSystemBasedOnSpark](https://github.com/toughhou/recommenderSystemBasedOnSpark)
 
+### 12、Star History <a name="star-history"></a>
+
+<a href="https://github.com/HuQi2018/BiSheServer/stargazers">
+        <img width="500" alt="Star History Chart" src="https://api.star-history.com/svg?repos=HuQi2018/BiSheServer&type=Date">
+      </a> 

@@ -1,0 +1,4 @@
+pandas==0.25.3
+pyspark==3.1.1
+numpy==1.18.1
+findspark==2.0.1

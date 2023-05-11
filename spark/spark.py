@@ -13,9 +13,10 @@ from pyspark.sql.functions import col
 # 该文件为系统的电影推荐的spark离线处理脚本
 # 可放置linux下单独运行，只需在liunx下安装python3同时安装相应的库即可运行
 # 当然也可放置在windows下运行，但环境配置较复杂容易出错，不建议
-# 内部需要改动mysql数据库配置信息（35行）、spark信息（24行）、hadoop信息（39行）
+# 内部需要改动mysql数据库配置信息（33行、34行、36行）、spark信息（24行）、hadoop信息（39行）
 # 注：该脚本做了数据量的限制，于  221行 可以取消数据量的限制
 # 执行完成后会将数据更新到表“user_usermovierecommend”，同时在hadoop中路径movie_system会生成计算的相关相似度文件
+# 算法参考 recommenderSystemBasedOnSpark 项目：https://github.com/toughhou/recommenderSystemBasedOnSpark
 
 
 class Calculator:
