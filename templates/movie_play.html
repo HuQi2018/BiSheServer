@@ -1,0 +1,413 @@
+
+<html lang="zh-cn">
+{% load set_var %}
+{% set movie_datas = data.movie_data %}
+    <head>
+        <title>Zero影院 - 播放</title>
+        {% include "include/head.html" %}
+        <style>
+            .player-container {
+                width: 100%;
+                max-width: 900px;
+                margin: 0 auto;
+                background: #000;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+            
+            .player-screen {
+                width: 100%;
+                height: 500px;
+                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                color: #fff;
+            }
+            
+            .player-screen .movie-title {
+                font-size: 24px;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+            
+            .player-screen .movie-poster {
+                width: 200px;
+                height: 300px;
+                border-radius: 8px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+                object-fit: cover;
+                margin-bottom: 20px;
+            }
+            
+            .player-controls {
+                background: linear-gradient(transparent, rgba(0,0,0,0.8));
+                padding: 15px 20px;
+            }
+            
+            .progress-bar-container {
+                width: 100%;
+                height: 6px;
+                background: rgba(255,255,255,0.2);
+                border-radius: 3px;
+                margin-bottom: 15px;
+                cursor: pointer;
+                position: relative;
+            }
+            
+            .progress-bar-container:hover {
+                height: 8px;
+            }
+            
+            .progress-bar {
+                height: 100%;
+                background: linear-gradient(90deg, #e94560, #ff6b6b);
+                border-radius: 3px;
+                width: 0%;
+                transition: width 0.1s linear;
+            }
+            
+            .progress-handle {
+                position: absolute;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                width: 14px;
+                height: 14px;
+                background: #fff;
+                border-radius: 50%;
+                cursor: pointer;
+                display: none;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            }
+            
+            .progress-bar-container:hover .progress-handle {
+                display: block;
+            }
+            
+            .controls-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+            
+            .controls-left {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+            
+            .play-btn {
+                width: 40px;
+                height: 40px;
+                background: #e94560;
+                border: none;
+                border-radius: 50%;
+                color: #fff;
+                font-size: 18px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s;
+            }
+            
+            .play-btn:hover {
+                background: #ff6b6b;
+                transform: scale(1.05);
+            }
+            
+            .time-display {
+                color: #fff;
+                font-size: 14px;
+            }
+            
+            .time-display .current {
+                color: #e94560;
+            }
+            
+            .movie-info-section {
+                background: #fff;
+                padding: 30px;
+                border-radius: 8px;
+                margin-top: 20px;
+            }
+            
+            .watch-status {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: #fff;
+                padding: 10px 20px;
+                border-radius: 20px;
+                margin-bottom: 20px;
+                display: inline-block;
+            }
+            
+            .watch-status.completed {
+                background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            }
+            
+            .back-link {
+                display: inline-block;
+                margin-bottom: 20px;
+                color: #666;
+                text-decoration: none;
+            }
+            
+            .back-link:hover {
+                color: #e94560;
+            }
+        </style>
+    </head>
+    
+    <body class="home">
+        {% include "include/nav.html" %}
+        <div id="main">
+            {% include "include/tag.html" %}
+            <script type="text/javascript">
+                let movie_data = {{ movie_datas|safe|default:"[]" }};
+                let user_movie_rating = {{ data.user_movie_rating|safe|default:"[]" }};
+                let user_movie_like = {{ data.user_movie_like|safe|default:"[]" }};
+            </script>
+            
+            <div class="mikd">
+                <div class="mi_btcon" style="padding: 20px;">
+                    <a href="/movie.html?id={{ movie_datas.movie_id }}" class="back-link">
+                        <i class="fa fa-arrow-left"></i> 返回电影详情页
+                    </a>
+                    
+                    <div id="watch-status" class="watch-status">
+                        <i class="fa fa-play-circle"></i> <span id="watch-status-text">准备播放</span>
+                    </div>
+                    
+                    <div class="player-container">
+                        <div class="player-screen" id="player-screen">
+                            <div class="movie-title">{{ movie_datas.title }}</div>
+                            <img class="movie-poster" src="{{ movie_datas.images|safe }}" alt="{{ movie_datas.title }}" onerror="this.src='/static/images/default_movie.jpg'">
+                            <div id="play-hint" style="font-size: 14px; opacity: 0.8;">
+                                <i class="fa fa-play"></i> 点击下方播放按钮开始模拟播放
+                            </div>
+                        </div>
+                        
+                        <div class="player-controls">
+                            <div class="progress-bar-container" id="progress-container">
+                                <div class="progress-bar" id="progress-bar"></div>
+                                <div class="progress-handle" id="progress-handle" style="left: 0%;"></div>
+                            </div>
+                            
+                            <div class="controls-row">
+                                <div class="controls-left">
+                                    <button class="play-btn" id="play-btn" title="播放">
+                                        <i class="fa fa-play" id="play-icon"></i>
+                                    </button>
+                                    <div class="time-display">
+                                        <span class="current" id="current-time">00:00</span>
+                                        <span> / </span>
+                                        <span id="total-time">02:00</span>
+                                    </div>
+                                </div>
+                                <div style="color: #fff; font-size: 13px;">
+                                    <span id="continuous-time">连续观看: 0秒</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="movie-info-section">
+                        <h3 style="margin-bottom: 15px; color: #333;">播放说明</h3>
+                        <div style="color: #666; line-height: 1.8;">
+                            <p><i class="fa fa-info-circle" style="color: #667eea;"></i> 这是一个模拟播放器，用于演示观影历史记录功能。</p>
+                            <p><i class="fa fa-clock-o" style="color: #667eea;"></i> 当满足以下两个条件时，会自动记录观影历史：</p>
+                            <ul style="margin-left: 20px; margin-top: 10px;">
+                                <li>播放进度达到 <strong style="color: #e94560;">90%</strong> 以上</li>
+                                <li>连续观看时长超过 <strong style="color: #e94560;">5分钟（300秒）</strong></li>
+                            </ul>
+                            <p style="margin-top: 10px;"><i class="fa fa-lightbulb-o" style="color: #f39c12;"></i> 提示：你可以拖动进度条来快速测试，或者点击播放按钮让时间自然流逝。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            let movie_id = movie_data.movie_id;
+            let title = movie_data.title;
+            let images = strToJson(movie_data.images);
+            
+            let isPlaying = false;
+            let currentProgress = 0;
+            let continuousSeconds = 0;
+            let totalDuration = 120;
+            let watchHistoryRecorded = false;
+            
+            let playInterval = null;
+            let continuousInterval = null;
+            
+            const playBtn = document.getElementById('play-btn');
+            const playIcon = document.getElementById('play-icon');
+            const progressBar = document.getElementById('progress-bar');
+            const progressHandle = document.getElementById('progress-handle');
+            const progressContainer = document.getElementById('progress-container');
+            const currentTimeEl = document.getElementById('current-time');
+            const watchStatus = document.getElementById('watch-status');
+            const watchStatusText = document.getElementById('watch-status-text');
+            const continuousTimeEl = document.getElementById('continuous-time');
+            
+            function formatTime(seconds) {
+                let mins = Math.floor(seconds / 60);
+                let secs = Math.floor(seconds % 60);
+                return String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+            }
+            
+            function updateUI() {
+                let currentSeconds = (currentProgress / 100) * totalDuration;
+                currentTimeEl.textContent = formatTime(currentSeconds);
+                progressBar.style.width = currentProgress + '%';
+                progressHandle.style.left = currentProgress + '%';
+                continuousTimeEl.textContent = '连续观看: ' + continuousSeconds + '秒';
+            }
+            
+            function checkWatchCompletion() {
+                if (watchHistoryRecorded) return;
+                
+                if (currentProgress >= 90 && continuousSeconds >= 300) {
+                    recordWatchHistory();
+                }
+            }
+            
+            function recordWatchHistory() {
+                if (watchHistoryRecorded) return;
+                
+                watchHistoryRecorded = true;
+                
+                $.ajax({
+                    url: '/movie/watch_history_record',
+                    data: {
+                        movieId: movie_id,
+                        duration: continuousSeconds,
+                        progress: currentProgress,
+                        completed: 'true'
+                    },
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data.code == 200) {
+                            watchStatus.classList.add('completed');
+                            watchStatusText.textContent = '观看完成，已记录观影历史！';
+                            watchStatus.innerHTML = '<i class="fa fa-check-circle"></i> ' + watchStatusText;
+                            show_tip('观影历史已记录！', '/userHistory.html', 3);
+                        } else {
+                            show_tip(data.msg, '', 2);
+                        }
+                    },
+                    error: function() {
+                        show_tip('记录观影历史失败，请稍后重试', '', 2);
+                        watchHistoryRecorded = false;
+                    }
+                });
+            }
+            
+            function togglePlay() {
+                if (isPlaying) {
+                    pause();
+                } else {
+                    play();
+                }
+            }
+            
+            function play() {
+                if (isPlaying) return;
+                
+                isPlaying = true;
+                playIcon.className = 'fa fa-pause';
+                playBtn.title = '暂停';
+                watchStatusText.textContent = '正在播放...';
+                
+                playInterval = setInterval(function() {
+                    if (currentProgress < 100) {
+                        currentProgress += 0.5;
+                        if (currentProgress > 100) currentProgress = 100;
+                        updateUI();
+                        checkWatchCompletion();
+                    } else {
+                        pause();
+                    }
+                }, 300);
+                
+                continuousInterval = setInterval(function() {
+                    continuousSeconds++;
+                    updateUI();
+                    checkWatchCompletion();
+                }, 1000);
+            }
+            
+            function pause() {
+                isPlaying = false;
+                playIcon.className = 'fa fa-play';
+                playBtn.title = '播放';
+                watchStatusText.textContent = '已暂停';
+                
+                if (playInterval) {
+                    clearInterval(playInterval);
+                    playInterval = null;
+                }
+                if (continuousInterval) {
+                    clearInterval(continuousInterval);
+                    continuousInterval = null;
+                }
+            }
+            
+            function seekTo(percent) {
+                currentProgress = Math.max(0, Math.min(100, percent));
+                updateUI();
+                checkWatchCompletion();
+            }
+            
+            let isDragging = false;
+            
+            progressContainer.addEventListener('click', function(e) {
+                let rect = this.getBoundingClientRect();
+                let percent = ((e.clientX - rect.left) / rect.width) * 100;
+                seekTo(percent);
+            });
+            
+            progressHandle.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                isDragging = true;
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                let rect = progressContainer.getBoundingClientRect();
+                let percent = ((e.clientX - rect.left) / rect.width) * 100;
+                seekTo(percent);
+            });
+            
+            document.addEventListener('mouseup', function() {
+                isDragging = false;
+            });
+            
+            playBtn.addEventListener('click', togglePlay);
+            
+            document.addEventListener('keydown', function(e) {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    togglePlay();
+                }
+                if (e.code === 'ArrowRight') {
+                    e.preventDefault();
+                    seekTo(currentProgress + 5);
+                }
+                if (e.code === 'ArrowLeft') {
+                    e.preventDefault();
+                    seekTo(currentProgress - 5);
+                }
+            });
+            
+            updateUI();
+        </script>
+        
+        {% include "include/footer.html" %}
+    </body>
+
+</html>

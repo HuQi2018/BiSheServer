@@ -110,6 +110,15 @@ if(user_movie_like[0]&&user_movie_like[0]==movie_id){
 }
 
 
+var play_button = '<div style="margin-top: 20px;">' +
+    '<a href="/movie_play.html?id='+movie_id+'" class="btn btn-primary" style="padding: 12px 40px; font-size: 16px; border-radius: 25px;">' +
+    '<i class="fa fa-play"></i> 开始播放' +
+    '</a>' +
+    '<span style="margin-left: 15px; color: #999; font-size: 13px;">' +
+    '<i class="fa fa-info-circle"></i> 播放进度达到90%且连续观看超过5分钟后，自动记录观影历史' +
+    '</span>' +
+    '</div>';
+
 var moviedteail_list2 = summary_txt + photos_txt;
 var movie_detail = '<div class="dyxingq"><div class="mi_ne_kd dypre">' +
     '<div class="dyimg fl"><img src="'+images["small"]+'"><div style="bottom: 2px; right: -8px; position: absolute;"><p class="movie_like '+movie_like+'" movieId="'+movie_id+'">&#10084;</p></div>';
@@ -120,6 +129,7 @@ movie_detail = movie_detail + '</div><div class="dytext fl"><div class="moviedte
     '                                <span>' + original_title + '</span>' +
     '                            </div><ul class="moviedteail_list" id="moviedteail_list">';
 movie_detail = movie_detail + moviedteail_list;
+movie_detail = movie_detail + play_button;
 movie_detail = movie_detail + '</div><div class="clear"></div></div>';
 
 movie_detail = movie_detail + '<div id="movie_detail2" style="margin: 20px 40px;">' + moviedteail_list2 + '</div>';

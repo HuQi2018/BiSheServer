@@ -52,9 +52,6 @@ class MovieRating(APIView):
                 return JsonError("电影信息不存在，评分失败！")
             tag_thread_work("user_rating_tag", user_id=user_id, movie_id=movie_id, rating=rating, tag_sign="init")
             MovieRatings.objects.create(user_id=user_id, movie_id=movie_id, rating=rating)
-        
-        Movie.add_watch_history(user_id=user_id, movie_id=movie_id, watch_duration=0, progress=100.0, is_completed=True)
-        
         return JsonResponse({"msg": "感谢您的评分！", "url": ""})
 
     def post(self, request, *args, **kwargs):
@@ -84,13 +81,11 @@ class MovieLike(APIView):
                 tag_thread_work("user_like_tag", user_id=user_id, movie_id=movie_id, tag_sign="like")
                 like_rs.update(like_time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), status=1)
                 msg = "收藏成功！"
-                Movie.add_watch_history(user_id=user_id, movie_id=movie_id, watch_duration=0, progress=100.0, is_completed=True)
         else:
             if CollectMovieDB.objects.filter(movie_id=movie_id).exists():
                 tag_thread_work("user_like_tag", user_id=user_id, movie_id=movie_id, tag_sign="init")
                 MovieLikes.objects.create(user_id=user_id, movie_id=movie_id, status=1)
                 msg = "收藏成功！"
-                Movie.add_watch_history(user_id=user_id, movie_id=movie_id, watch_duration=0, progress=100.0, is_completed=True)
             else:
                 return JsonError("电影信息不存在，收藏失败！")
         return JsonResponse({"msg": msg, "url": ""})
@@ -123,8 +118,6 @@ class MovieComment(APIView):
             movie_comment = MovieComments.objects.create(user_id=user_id, movie_id=movie_id, userName=user_uname,
                                                          title=title, movieName=movie_name, content=content_text,
                                                          emotion=emotion, ip=ip)
-            
-            Movie.add_watch_history(user_id=user_id, movie_id=int(movie_id), watch_duration=0, progress=100.0, is_completed=True)
         else:
             return JsonError("评论失败，标题和内容不能为空！")
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")

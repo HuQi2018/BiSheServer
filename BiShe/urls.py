@@ -27,6 +27,7 @@ urlpatterns = [
     path('category.html', views.category),    # 分类
     path('search.html', views.search),    # 搜索
     path('movie.html', views.movie),    # 电影详情
+    path('movie_play.html', views.movie_play),    # 电影播放
     path('userInfo.html', views.user_info),    # 用户中心
     path('forgetPwd.html', views.foget_password),    # 忘记密码
     path('modifyPwd.html', views.modify_password),    # 修改密码

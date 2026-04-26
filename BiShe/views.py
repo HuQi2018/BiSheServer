@@ -141,10 +141,42 @@ def movie(request):
     response.set_cookie("uuid", cookie_uuid)
     delay_work.tag_thread_work("user_brow_tag", user_id=user_id, movie_id=movie_id)
     MovieBrows.objects.create(user_id=user_id, movie_id=movie_id, cookie_uuid=cookie_uuid)
+    return response
+
+
+# 电影播放页面
+def movie_play(request):
+    user_id = request.session.get("user_id") if request.session.get("user_id") else 2
+    if user_id == 2:
+        data = page_nav(request)
+        return render(request, 'tempate.html', {"tip": "请先登录后再观看！", "url": "/login.html", "time": 3,
+                                                "title": "错误页面", "data": data})
     
-    if user_id != 2:
-        Movie.add_watch_history(user_id=user_id, movie_id=movie_id, watch_duration=0, progress=0.0, is_completed=False)
+    movie_id = request.GET.get("id")
+    data = page_nav(request)
     
+    data["user_movie_rating"] = []
+    data["user_movie_like"] = []
+    
+    # 获取用户对电影评分信息
+    data["user_movie_rating"] = get_user_movie_rating(user_id=user_id, movie_id=movie_id, is_list=1)
+    # 获取用户对电影收藏信息
+    data["user_movie_like"] = get_user_movie_like(user_id=user_id, movie_id=movie_id, is_list=1)
+    
+    # 电影信息
+    data["movie_data"] = movie_search_by_id(movie_id)
+    
+    if not data['movie_data']:
+        return render(request, 'tempate.html', {"tip": "电影信息无效，不存在有关信息！", "url": "/", "time": 3,
+                                                "title": "错误页面", "data": data})
+    
+    cookie_uuid = request.COOKIES.get("uuid")
+    if not cookie_uuid:
+        cookie_uuid = uuid.uuid4().hex
+        request.COOKIES["uuid"] = cookie_uuid
+    
+    response = render(request, 'movie_play.html', {"page": "movie_play.html", "data": data})
+    response.set_cookie("uuid", cookie_uuid)
     return response
 
 
