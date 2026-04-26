@@ -217,12 +217,18 @@
                         <h3 style="margin-bottom: 15px; color: #333;">播放说明</h3>
                         <div style="color: #666; line-height: 1.8;">
                             <p><i class="fa fa-info-circle" style="color: #667eea;"></i> 这是一个模拟播放器，用于演示观影历史记录功能。</p>
-                            <p><i class="fa fa-clock-o" style="color: #667eea;"></i> 当满足以下两个条件时，会自动记录观影历史：</p>
+                            <p><i class="fa fa-clock-o" style="color: #667eea;"></i> 观影历史记录条件：</p>
                             <ul style="margin-left: 20px; margin-top: 10px;">
-                                <li>播放进度达到 <strong style="color: #e94560;">90%</strong> 以上</li>
-                                <li>连续观看时长超过 <strong style="color: #e94560;">5分钟（300秒）</strong></li>
+                                <li><strong style="color: #e94560;">实际连续观看满 5 分钟（300秒）</strong></li>
                             </ul>
-                            <p style="margin-top: 10px;"><i class="fa fa-lightbulb-o" style="color: #f39c12;"></i> 提示：你可以拖动进度条来快速测试，或者点击播放按钮让时间自然流逝。</p>
+                            <p style="margin-top: 10px;"><i class="fa fa-exclamation-triangle" style="color: #f39c12;"></i> 以下情况不会计入观看时长：</p>
+                            <ul style="margin-left: 20px; margin-top: 10px; color: #999;">
+                                <li>拖动进度条快进（不会增加累计时长）</li>
+                                <li>用户点击暂停按钮</li>
+                                <li>切到其他浏览器标签页</li>
+                                <li>最小化浏览器窗口</li>
+                            </ul>
+                            <p style="margin-top: 10px;"><i class="fa fa-lightbulb-o" style="color: #5cb85c;"></i> 只有保持页面可见且播放器处于播放状态时，才会累计观看时长。切走后回来，时长从暂停点继续累计。</p>
                         </div>
                     </div>
                 </div>
@@ -235,6 +241,7 @@
             let images = strToJson(movie_data.images);
             
             let isPlaying = false;
+            let isPageVisible = !document.hidden;
             let currentProgress = 0;
             let continuousSeconds = 0;
             let totalDuration = 120;
@@ -264,13 +271,18 @@
                 currentTimeEl.textContent = formatTime(currentSeconds);
                 progressBar.style.width = currentProgress + '%';
                 progressHandle.style.left = currentProgress + '%';
-                continuousTimeEl.textContent = '连续观看: ' + continuousSeconds + '秒';
+                
+                let statusText = '连续观看: ' + continuousSeconds + '秒';
+                if (!isPageVisible && isPlaying) {
+                    statusText += ' (页面不可见，计时暂停)';
+                }
+                continuousTimeEl.textContent = statusText;
             }
             
             function checkWatchCompletion() {
                 if (watchHistoryRecorded) return;
                 
-                if (currentProgress >= 90 && continuousSeconds >= 300) {
+                if (continuousSeconds >= 300) {
                     recordWatchHistory();
                 }
             }
@@ -307,6 +319,26 @@
                 });
             }
             
+            function startContinuousTimer() {
+                if (continuousInterval) {
+                    clearInterval(continuousInterval);
+                }
+                continuousInterval = setInterval(function() {
+                    if (isPlaying && isPageVisible) {
+                        continuousSeconds++;
+                        updateUI();
+                        checkWatchCompletion();
+                    }
+                }, 1000);
+            }
+            
+            function stopContinuousTimer() {
+                if (continuousInterval) {
+                    clearInterval(continuousInterval);
+                    continuousInterval = null;
+                }
+            }
+            
             function togglePlay() {
                 if (isPlaying) {
                     pause();
@@ -321,24 +353,24 @@
                 isPlaying = true;
                 playIcon.className = 'fa fa-pause';
                 playBtn.title = '暂停';
-                watchStatusText.textContent = '正在播放...';
+                
+                if (isPageVisible) {
+                    watchStatusText.textContent = '正在播放...';
+                } else {
+                    watchStatusText.textContent = '正在播放 (页面不可见)';
+                }
                 
                 playInterval = setInterval(function() {
                     if (currentProgress < 100) {
                         currentProgress += 0.5;
                         if (currentProgress > 100) currentProgress = 100;
                         updateUI();
-                        checkWatchCompletion();
                     } else {
                         pause();
                     }
                 }, 300);
                 
-                continuousInterval = setInterval(function() {
-                    continuousSeconds++;
-                    updateUI();
-                    checkWatchCompletion();
-                }, 1000);
+                startContinuousTimer();
             }
             
             function pause() {
@@ -351,16 +383,30 @@
                     clearInterval(playInterval);
                     playInterval = null;
                 }
-                if (continuousInterval) {
-                    clearInterval(continuousInterval);
-                    continuousInterval = null;
+                stopContinuousTimer();
+            }
+            
+            function handleVisibilityChange() {
+                isPageVisible = !document.hidden;
+                
+                if (isPageVisible) {
+                    if (isPlaying) {
+                        watchStatusText.textContent = '正在播放...';
+                        startContinuousTimer();
+                    }
+                } else {
+                    if (isPlaying) {
+                        watchStatusText.textContent = '正在播放 (页面不可见)';
+                        stopContinuousTimer();
+                    }
                 }
+                
+                updateUI();
             }
             
             function seekTo(percent) {
                 currentProgress = Math.max(0, Math.min(100, percent));
                 updateUI();
-                checkWatchCompletion();
             }
             
             let isDragging = false;
@@ -386,6 +432,8 @@
             document.addEventListener('mouseup', function() {
                 isDragging = false;
             });
+            
+            document.addEventListener('visibilitychange', handleVisibilityChange);
             
             playBtn.addEventListener('click', togglePlay);
             
