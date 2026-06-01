@@ -75,6 +75,16 @@ Hadoop配置主要用于系统运行时产生的日志进行上传到HDFS使用�
 上述命令运行完后，导入基础数据：
     movie_collectmoviedb.sql  -》  movie_movietagdb.sql  -》  other_sql.sql
     根据以上顺序执行sql，无错误表示成功。
+
+解决图片请求拦截问题：
+UPDATE movie_collectmoviedb 
+SET images = REPLACE(images, 'https://img9.doubanio.com/', 'http://127.0.0.1:8000/api/proxy_image?url=https://img9.doubanio.com/'), 
+photos = REPLACE(photos, 'https://img9.doubanio.com/', 'http://127.0.0.1:8000/api/proxy_image?url=https://img9.doubanio.com/');
+
+UPDATE movie_collectmoviedb 
+SET images = REPLACE(images, 'https://img1.doubanio.com/', 'http://127.0.0.1:8000/api/proxy_image?url=https://img1.doubanio.com/'), 
+photos = REPLACE(photos, 'https://img1.doubanio.com/', 'http://127.0.0.1:8000/api/proxy_image?url=https://img1.doubanio.com/');
+
 ```
 
 ### 5、项目启动运行
