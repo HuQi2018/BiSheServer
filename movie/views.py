@@ -52,9 +52,6 @@ class MovieRating(APIView):
                 return JsonError("电影信息不存在，评分失败！")
             tag_thread_work("user_rating_tag", user_id=user_id, movie_id=movie_id, rating=rating, tag_sign="init")
             MovieRatings.objects.create(user_id=user_id, movie_id=movie_id, rating=rating)
-        
-        Movie.add_watch_history(user_id=user_id, movie_id=movie_id, watch_duration=0, progress=100.0, is_completed=True)
-        
         return JsonResponse({"msg": "感谢您的评分！", "url": ""})
 
     def post(self, request, *args, **kwargs):
@@ -84,13 +81,11 @@ class MovieLike(APIView):
                 tag_thread_work("user_like_tag", user_id=user_id, movie_id=movie_id, tag_sign="like")
                 like_rs.update(like_time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), status=1)
                 msg = "收藏成功！"
-                Movie.add_watch_history(user_id=user_id, movie_id=movie_id, watch_duration=0, progress=100.0, is_completed=True)
         else:
             if CollectMovieDB.objects.filter(movie_id=movie_id).exists():
                 tag_thread_work("user_like_tag", user_id=user_id, movie_id=movie_id, tag_sign="init")
                 MovieLikes.objects.create(user_id=user_id, movie_id=movie_id, status=1)
                 msg = "收藏成功！"
-                Movie.add_watch_history(user_id=user_id, movie_id=movie_id, watch_duration=0, progress=100.0, is_completed=True)
             else:
                 return JsonError("电影信息不存在，收藏失败！")
         return JsonResponse({"msg": msg, "url": ""})
@@ -123,8 +118,6 @@ class MovieComment(APIView):
             movie_comment = MovieComments.objects.create(user_id=user_id, movie_id=movie_id, userName=user_uname,
                                                          title=title, movieName=movie_name, content=content_text,
                                                          emotion=emotion, ip=ip)
-            
-            Movie.add_watch_history(user_id=user_id, movie_id=int(movie_id), watch_duration=0, progress=100.0, is_completed=True)
         else:
             return JsonError("评论失败，标题和内容不能为空！")
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -153,134 +146,6 @@ class MovieCommentDelete(APIView):
             return JsonResponse({"msg": "评论删除成功！", "url": ""})
         else:
             return JsonError("您没有权限删除该评论！")
-
-    def post(self, request, *args, **kwargs):
-        return JsonError("不支持POST请求！")
-
-
-# 记录观影历史
-class MovieWatchHistoryRecord(APIView):
-    def get(self, request, *args, **kwargs):
-        if isNotLogin(request):
-            return JsonError("请先登录！")
-        try:
-            movie_id = int(request.GET.get("movieId"))
-            watch_duration = int(request.GET.get("duration", 0))
-            progress = float(request.GET.get("progress", 0.0))
-            is_completed = request.GET.get("completed", "false").lower() == "true"
-            if not movie_id:
-                raise Exception
-        except:
-            return JsonError("请确认请求参数无误！")
-        user_id = request.session.get("user_id")
-        
-        # 检查电影是否存在
-        if not CollectMovieDB.objects.filter(movie_id=movie_id).exists():
-            return JsonError("电影信息不存在！")
-        
-        # 记录观影历史
-        success, result = Movie.add_watch_history(
-            user_id=user_id,
-            movie_id=movie_id,
-            watch_duration=watch_duration,
-            progress=progress,
-            is_completed=is_completed
-        )
-        
-        if success:
-            if is_completed:
-                msg = "观影历史记录成功！"
-            else:
-                msg = "观看进度已更新！"
-            return JsonResponse({"msg": msg, "url": ""})
-        else:
-            return JsonError("记录观影历史失败：" + str(result))
-
-    def post(self, request, *args, **kwargs):
-        return JsonError("不支持POST请求！")
-
-
-# 获取观影历史
-class MovieWatchHistoryList(APIView):
-    def get(self, request, *args, **kwargs):
-        if isNotLogin(request):
-            return JsonError("请先登录！")
-        user_id = request.session.get("user_id")
-        
-        # 获取时间范围参数
-        start_time = request.GET.get("startTime")
-        end_time = request.GET.get("endTime")
-        is_completed = request.GET.get("completed")
-        
-        # 转换时间参数
-        if start_time:
-            try:
-                start_time = datetime.datetime.strptime(start_time, "%Y-%m-%d")
-            except:
-                start_time = None
-        if end_time:
-            try:
-                end_time = datetime.datetime.strptime(end_time, "%Y-%m-%d")
-                # 设置为当天的最后一刻
-                end_time = end_time.replace(hour=23, minute=59, second=59)
-            except:
-                end_time = None
-        
-        # 转换完成状态参数
-        if is_completed is not None:
-            is_completed = is_completed.lower() == "true"
-        
-        # 获取观影历史
-        watch_history = Movie.get_user_watch_history(
-            user_id=user_id,
-            start_time=start_time,
-            end_time=end_time,
-            is_completed=is_completed
-        )
-        
-        return JsonResponse({"data": watch_history, "msg": "获取成功！"})
-
-    def post(self, request, *args, **kwargs):
-        return JsonError("不支持POST请求！")
-
-
-# 清空观影历史
-class MovieWatchHistoryClear(APIView):
-    def get(self, request, *args, **kwargs):
-        if isNotLogin(request):
-            return JsonError("请先登录！")
-        user_id = request.session.get("user_id")
-        
-        success = Movie.clear_watch_history(user_id=user_id)
-        
-        if success:
-            return JsonResponse({"msg": "观影历史已清空！", "url": ""})
-        else:
-            return JsonError("清空观影历史失败！")
-
-    def post(self, request, *args, **kwargs):
-        return JsonError("不支持POST请求！")
-
-
-# 删除单条观影历史
-class MovieWatchHistoryDelete(APIView):
-    def get(self, request, *args, **kwargs):
-        if isNotLogin(request):
-            return JsonError("请先登录！")
-        try:
-            movie_id = int(request.GET.get("movieId"))
-            if not movie_id:
-                raise Exception
-        except:
-            return JsonError("请确认请求参数无误！")
-        user_id = request.session.get("user_id")
-        
-        success = Movie.delete_watch_history(user_id=user_id, movie_id=movie_id)
-        
-        if success:
-            return JsonResponse({"msg": "观影历史已删除！", "url": ""})
-        else:
-            return JsonError("删除观影历史失败！")
 
     def post(self, request, *args, **kwargs):
         return JsonError("不支持POST请求！")

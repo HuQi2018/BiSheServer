@@ -7,7 +7,7 @@ from django.contrib.auth import authenticate, login
 from django.shortcuts import render
 
 from api import movie_api, user_api, api, delay_work
-from movie.models import MovieBrows, MovieWatchHistory
+from movie.models import MovieBrows
 
 from user.models import UsersBase, UsersDetail
 
@@ -141,10 +141,6 @@ def movie(request):
     response.set_cookie("uuid", cookie_uuid)
     delay_work.tag_thread_work("user_brow_tag", user_id=user_id, movie_id=movie_id)
     MovieBrows.objects.create(user_id=user_id, movie_id=movie_id, cookie_uuid=cookie_uuid)
-    
-    if user_id != 2:
-        Movie.add_watch_history(user_id=user_id, movie_id=movie_id, watch_duration=0, progress=0.0, is_completed=False)
-    
     return response
 
 
@@ -239,24 +235,6 @@ def user_comment(request):
     if user_rs.exists():
         return render(request, 'userInfo.html',
                       {"page": "user_comment.html", "data": data, "title": "评论管理"})
-    else:
-        return render(request, 'tempate.html',
-                      {"tip": "用户不存在，请重新登陆！", "url": "/", "time": 3, "title": "错误页面", "data": data})
-
-
-# 用户观影历史管理
-def user_history(request):
-    data = page_nav(request)
-    if isNotLogin(request):
-        return render(request, 'tempate.html',
-                      {"tip": "请先登录！", "url": "/", "time": 3, "title": "错误页面", "data": data})
-    user_id = request.session['user_id']
-    user_rs = UsersBase.objects.filter(id=user_id)
-    # 获取用户观影历史
-    data["user_watch_history"] = Movie.get_user_watch_history(user_id=user_id)
-    if user_rs.exists():
-        return render(request, 'userInfo.html',
-                      {"page": "user_history.html", "data": data, "title": "观影历史"})
     else:
         return render(request, 'tempate.html',
                       {"tip": "用户不存在，请重新登陆！", "url": "/", "time": 3, "title": "错误页面", "data": data})
