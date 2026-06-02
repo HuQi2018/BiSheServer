@@ -12,7 +12,7 @@ from user.models import UserTag, UserMovieRecommend
 from .api import Api
 from api.model_json import queryset_to_json
 from movie.models import CollectMovieTypeDB, CollectMovieDB, MovieLikes, MovieRatings, MovieComments, MovieSearchs, \
-    MovieBrows, MovieRatingDB, MoviePubdateDB, MovieTagDB
+    MovieBrows, MovieRatingDB, MoviePubdateDB, MovieTagDB, MovieWatchHistory
 set_readis = Api().set_readis
 get_readis = Api().get_readis
 
@@ -508,6 +508,94 @@ class Movie:
 
         return movie_cai_rs_json
 
+    # 获取用户观影历史
+    @staticmethod
+    def get_user_watch_history(user_id, start_time=None, end_time=None, is_completed=None):
+        query = Q(user_id=user_id)
+        if start_time:
+            query &= Q(watch_time__gte=start_time)
+        if end_time:
+            query &= Q(watch_time__lte=end_time)
+        if is_completed is not None:
+            query &= Q(is_completed=is_completed)
+
+        watch_history_rs = MovieWatchHistory.objects.order_by("-watch_time").filter(query).all()
+        watch_history_rs_json = queryset_to_json(watch_history_rs)
+        return watch_history_rs_json
+
+    # 获取用户已观看的电影ID列表
+    @staticmethod
+    def get_user_watched_movie_ids(user_id):
+        watched_movie_ids = list(MovieWatchHistory.objects.filter(
+            Q(user_id=user_id) & Q(is_completed=True)
+        ).values_list("movie__movie_id", flat=True))
+        return watched_movie_ids
+
+    # 记录观影历史
+    @staticmethod
+    def add_watch_history(user_id, movie_id, watch_duration=0, progress=0.0, is_completed=False):
+        try:
+            watch_history, created = MovieWatchHistory.objects.get_or_create(
+                user_id=user_id,
+                movie_id=movie_id,
+                defaults={
+                    'watch_duration': watch_duration,
+                    'progress': progress,
+                    'is_completed': is_completed
+                }
+            )
+            if not created:
+                watch_history.watch_time = datetime.datetime.now()
+                if watch_duration > watch_history.watch_duration:
+                    watch_history.watch_duration = watch_duration
+                if progress > watch_history.progress:
+                    watch_history.progress = progress
+                if is_completed:
+                    watch_history.is_completed = True
+                watch_history.save()
+            return True, watch_history
+        except Exception as e:
+            return False, str(e)
+
+    # 更新观看进度
+    @staticmethod
+    def update_watch_progress(user_id, movie_id, watch_duration, progress, is_completed=False):
+        try:
+            watch_history = MovieWatchHistory.objects.filter(
+                Q(user_id=user_id) & Q(movie_id=movie_id)
+            ).first()
+            if watch_history:
+                watch_history.watch_time = datetime.datetime.now()
+                if watch_duration > watch_history.watch_duration:
+                    watch_history.watch_duration = watch_duration
+                if progress > watch_history.progress:
+                    watch_history.progress = progress
+                if is_completed:
+                    watch_history.is_completed = True
+                watch_history.save()
+                return True
+            return False
+        except Exception as e:
+            return False
+
+    # 清空观影历史
+    @staticmethod
+    def clear_watch_history(user_id):
+        try:
+            MovieWatchHistory.objects.filter(user_id=user_id).delete()
+            return True
+        except Exception as e:
+            return False
+
+    # 删除单条观影历史
+    @staticmethod
+    def delete_watch_history(user_id, movie_id):
+        try:
+            MovieWatchHistory.objects.filter(Q(user_id=user_id) & Q(movie_id=movie_id)).delete()
+            return True
+        except Exception as e:
+            return False
+
     # 获取系统推荐的5部电影（历史记录中，猜你喜欢） 应使用Spark中spark.py最后获取的结果
     def get_user_movie_5_cai(self, user_id):
 
@@ -519,6 +607,13 @@ class Movie:
         if not user_movie_recommend.exists():
             return []
         movie_id_li = user_movie_recommend.get(user_id=user_id).movie_id_li.split("，")
+        
+        # 获取用户已观看的电影ID列表，用于过滤
+        watched_movie_ids = self.get_user_watched_movie_ids(user_id)
+        
+        # 过滤掉已观看的电影
+        movie_id_li = [mid for mid in movie_id_li if int(mid) not in watched_movie_ids]
+        
         if len(movie_id_li) < 5:
             user_tag_li = UserTag.objects.filter(Q(tag_type="info_movie_type") & Q(user_id=user_id))\
                 .order_by("-tag_weight").values_list("tag_name", flat=True)
@@ -528,8 +623,29 @@ class Movie:
                 user_tag_li = list(user_tag_li)[:4]
             # user_api.User().getUserPreferTag(user_id).split(",")
             movie_id_li = self.get_5_tag_movie_id(user_tag_li)
+            # 再次过滤已观看的电影
+            movie_id_li = [mid for mid in movie_id_li if mid not in watched_movie_ids]
         else:
-            movie_id_li = random.sample(movie_id_li, 5)
+            # 如果还有足够的推荐电影，随机选择5个
+            if len(movie_id_li) >= 5:
+                movie_id_li = random.sample(movie_id_li, 5)
+            # 如果不够5个，补充一些未观看的电影
+            else:
+                # 获取用户标签
+                user_tag_li = UserTag.objects.filter(Q(tag_type="info_movie_type") & Q(user_id=user_id))\
+                    .order_by("-tag_weight").values_list("tag_name", flat=True)
+                if not user_tag_li:
+                    user_tag_li = ["动作", "科幻", "爱情", "喜剧"]
+                else:
+                    user_tag_li = list(user_tag_li)[:4]
+                # 获取额外的电影
+                extra_movie_ids = self.get_5_tag_movie_id(user_tag_li)
+                # 过滤已观看的
+                extra_movie_ids = [mid for mid in extra_movie_ids if mid not in watched_movie_ids and mid not in movie_id_li]
+                # 补充到5个
+                movie_id_li = movie_id_li + extra_movie_ids
+                if len(movie_id_li) > 5:
+                    movie_id_li = movie_id_li[:5]
 
         user_movie_tag_cai_rs = CollectMovieDB.objects.filter(movie_id__in=movie_id_li).all()
         user_movie_tag_cai_rs_json = queryset_to_json(user_movie_tag_cai_rs)

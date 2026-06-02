@@ -190,6 +190,28 @@ class MovieBrows(models.Model):
         return model_json.model_to_json(self)
 
 
+# 用户观影历史表
+class MovieWatchHistory(models.Model):
+    user = models.ForeignKey(UsersBase, verbose_name='用户', on_delete=models.CASCADE)
+    movie = models.ForeignKey(CollectMovieDB, to_field="movie_id", verbose_name='电影', on_delete=models.CASCADE)
+    watch_time = models.DateTimeField(default=datetime.datetime.now, verbose_name='观看时间')
+    watch_duration = models.IntegerField(default=0, verbose_name='观看时长(秒)')
+    progress = models.FloatField(default=0.0, verbose_name='观看进度(0-100)')
+    is_completed = models.BooleanField(default=False, verbose_name='是否观看完成')
+
+    def __str__(self):
+        return '%s - %s - %s - %s' % (self.user.user_name, self.movie.title, self.watch_time, self.is_completed)
+
+    class Meta:
+        verbose_name = '用户观影历史'
+        verbose_name_plural = verbose_name
+        unique_together = ('user', 'movie')
+
+    # 将属性和属性值转换成dict 列表生成式
+    def toDict(self):
+        return model_json.model_to_json(self)
+
+
 # 用户搜索记录表
 class MovieSearchs(models.Model):
     user = models.ForeignKey(UsersBase, verbose_name='用户', on_delete=models.CASCADE)
