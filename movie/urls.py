@@ -23,9 +23,5 @@ urlpatterns = [
     path('movie_like', views.MovieLike.as_view()),    # 收藏
     path('movie_comment', views.MovieComment.as_view()),    # 添加评论
     path('delete_movie_comment', views.MovieCommentDelete.as_view()),    # 删除评论
-    path('watch_history_record', views.MovieWatchHistoryRecord.as_view()),    # 记录观影历史
-    path('watch_history_list', views.MovieWatchHistoryList.as_view()),    # 获取观影历史列表
-    path('watch_history_clear', views.MovieWatchHistoryClear.as_view()),    # 清空观影历史
-    path('watch_history_delete', views.MovieWatchHistoryDelete.as_view()),    # 删除单条观影历史
     # path('test', views.TryView.as_view()),    # get、post
 ]
