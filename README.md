@@ -199,5 +199,5 @@ django.core.exceptions.ImproperlyConfigured: mysqlclient 1.3.13 or newer is requ
 ### 12、Star History <a name="star-history"></a>
 
 <a href="https://github.com/HuQi2018/BiSheServer/stargazers">
-        <img width="500" alt="Star History Chart" src="https://api.star-history.com/svg?repos=HuQi2018/BiSheServer&type=Date">
+        <img width="500" alt="Star History Chart" src="https://star-history.dera.page/svg?repos=HuQi2018/BiSheServer&type=Date">
       </a> 
